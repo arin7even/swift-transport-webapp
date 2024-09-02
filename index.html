@@ -6,44 +6,67 @@
     <title>Swift Transport Booking</title>
     <style>
         body {
-            font-family: Arial, sans-serif;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             margin: 0;
             padding: 20px;
-            background-color: #f4f4f4;
+            background-color: #121212; /* Dark mode background */
+            color: #ffffff; /* White text color for readability */
         }
         h1 {
-            color: #333;
+            color: #00bcd4; /* Cyan color for headings */
+            text-align: center; /* Centered heading */
         }
         form {
             display: flex;
             flex-direction: column;
+            max-width: 600px; /* Set a maximum width for the form */
+            margin: 0 auto; /* Center the form */
+            padding: 20px;
+            border-radius: 8px;
+            background-color: #1e1e1e; /* Form background */
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Subtle shadow for depth */
+        }
+        label {
+            margin: 10px 0 5px;
+            font-weight: bold; /* Bold labels for better visibility */
         }
         input, button {
             margin: 10px 0;
             padding: 10px;
             font-size: 16px;
+            border-radius: 4px; /* Rounded corners */
+            border: 1px solid #555; /* Darker border */
         }
-        #pickupLocationLabel {
-            color: green; /* Change label text color to green */
+        input {
+            background-color: #2a2a2a; /* Dark input background */
+            color: #ffffff; /* White text in inputs */
         }
-        #pickupLocation {
-            background-color: #e0ffe0; /* Light green background for pickup address */
+        input:focus {
+            border-color: #00bcd4; /* Cyan border on focus */
+            outline: none; /* Remove outline */
         }
-        #dropoffLocationLabel {
-            color: red; /* Change label text color to red */
+        button {
+            background-color: #00bcd4; /* Cyan button background */
+            color: #ffffff; /* White text for button */
+            border: none; /* Remove default border */
+            cursor: pointer; /* Pointer cursor for buttons */
         }
-        #dropoffLocation {
-            background-color: #ffe0e0; /* Light red background for drop-off address */
+        button:hover {
+            background-color: #0097a7; /* Darker cyan on hover */
         }
         #map {
             height: 400px;
             width: 100%;
             margin-top: 20px;
+            border-radius: 8px; /* Rounded corners for map */
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Shadow for the map */
         }
         .eta {
             margin-top: 20px;
             font-size: 18px;
             font-weight: bold;
+            text-align: center; /* Centered ETA text */
+            color: #00bcd4; /* Cyan color for ETA */
         }
     </style>
     <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBsqYdVFXJcuUpxwkIEPJxEAGN2jlf-tT4"></script>
@@ -60,10 +83,10 @@
         <label for="pickupDate">Pickup Date:</label>
         <input type="date" id="pickupDate" name="pickupDate" required>
 
-        <label id="pickupLocationLabel" for="pickupLocation">Pickup Location:</label>
+        <label for="pickupLocation">Pickup Location:</label>
         <input type="text" id="pickupLocation" name="pickupLocation" required>
 
-        <label id="dropoffLocationLabel" for="dropoffLocation">Drop-off Location:</label>
+        <label for="dropoffLocation">Drop-off Location:</label>
         <input type="text" id="dropoffLocation" name="dropoffLocation" required>
 
         <button type="submit">Confirm Booking</button>
@@ -92,12 +115,7 @@
             const pickup = document.getElementById('pickupLocation').value;
             const dropoff = document.getElementById('dropoffLocation').value;
 
-            const pickupTime = new Date(`${date}T${time}`);
-            const now = new Date();
-            const hoursUntilPickup = Math.floor((pickupTime - now) / (1000 * 60 * 60));
-            const minutesUntilPickup = Math.round(((pickupTime - now) % (1000 * 60 * 60)) / (1000 * 60));
-
-            const message = `New ride booking from ${name}:\nTime: ${time}\nDate: ${date}\nPickup: ${pickup}\nDrop-off: ${dropoff}\nPickup in: ${hoursUntilPickup} hour(s) and ${minutesUntilPickup} minute(s)`;
+            const message = `New ride booking from ${name}:\nTime: ${time}\nDate: ${date}\nPickup: ${pickup}\nDrop-off: ${dropoff}`;
             console.log("Sending message:", message); // Debugging log
 
             const chatId = 104897472; // Your chat ID
@@ -107,6 +125,10 @@
             fetch(url)
                 .then(response => {
                     if (response.ok) {
+                        const pickupTime = new Date(`${date}T${time}`);
+                        const now = new Date();
+                        const hoursUntilPickup = Math.floor((pickupTime - now) / (1000 * 60 * 60));
+                        const minutesUntilPickup = Math.round(((pickupTime - now) % (1000 * 60 * 60)) / (1000 * 60));
                         alert(`Your pickup time is in ${hoursUntilPickup} hours and ${minutesUntilPickup} minutes. Wait for confirmations from the driver.`);
                         calculateRoute(pickup, dropoff);
                     } else {
