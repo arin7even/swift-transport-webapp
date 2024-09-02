@@ -117,7 +117,7 @@
             event.preventDefault();
             const name = document.getElementById('name').value;
             const time = document.getElementById('pickupTime').value;
-            the date = document.getElementById('pickupDate').value;
+            const date = document.getElementById('pickupDate').value;
             const pickup = document.getElementById('pickupLocation').value;
             const dropoff = document.getElementById('dropoffLocation').value;
 
@@ -178,24 +178,24 @@
                     if (dropoffMarker) dropoffMarker.setMap(null);
 
                     pickupMarker = new google.maps.Marker({
-                        position: response.routes[0.legs[0].start_location,
+                        position: response.routes[0].legs[0].start_location,
                         map: map,
                         icon: 'https://cdn1.iconfinder.com/data/icons/basic-ui-elements-coloricon/21/06_1-64.png' // Green car icon for pickup
                     });
 
                     dropoffMarker = new google.maps.Marker({
-                        position: response.routes[0.legs[0].end_location,
+                        position: response.routes[0].legs[0].end_location,
                         map: map,
                         icon: 'https://cdn1.iconfinder.com/data/icons/social-messaging-ui-color/254000/67-64.png' // Red car icon for drop-off
                     });
 
                     // Center the map on the route
                     const bounds = new google.maps.LatLngBounds();
-                    response.routes[0.legs[0].via_waypoints.forEach(waypoint => {
+                    response.routes[0].legs[0].via_waypoints.forEach(waypoint => {
                         bounds.extend(waypoint.location);
                     });
-                    bounds.extend(response.routes[0.legs[0].start_location);
-                    bounds.extend(response.routes[0.legs[0].end_location);
+                    bounds.extend(response.routes[0].legs[0].start_location);
+                    bounds.extend(response.routes[0].legs[0].end_location);
                     map.fitBounds(bounds);
                 } else {
                     console.error("Directions request failed due to", status);
