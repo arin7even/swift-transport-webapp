@@ -42,7 +42,6 @@
             box-shadow: 0 0 5px rgba(128, 255, 114, 0.5); /* Shadow on focus */
         }
         button {
-            background-color: #007bff; /* Blue button */
             color: white;
             border: none;
             cursor: pointer;
@@ -54,6 +53,12 @@
         }
         button:hover:enabled {
             background-color: #0056b3; /* Darker blue on hover */
+        }
+        #confirmRideBtn {
+            background-color: #28a745; /* Green button */
+        }
+        #cancelBtn {
+            background-color: #dc3545; /* Red button */
         }
         .blinking {
             background-color: #6c757d; /* Grey button */
@@ -104,11 +109,12 @@
     <h1>Book Your Ride</h1>
     <form id="bookingForm">
         <label for="name">Your Name:</label>
+        <small>(Needed for further confirmations from the driver)</small>
         <input type="text" id="name" name="name" required>
 
         <label for="phone">Phone Number:</label>
         <input type="text" id="phone" name="phone" required>
-        <small>(Needed for further confirmations from the driver)</small>
+        
 
         <label for="pickupTime">Pickup Time (HH:MM):</label>
         <input type="time" id="pickupTime" name="pickupTime" required>
