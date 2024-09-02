@@ -23,6 +23,12 @@
             padding: 10px;
             font-size: 16px;
         }
+        #pickupLocationLabel {
+            color: green; /* Change label text color to green */
+        }
+        #pickupLocation {
+            background-color: #e0ffe0; /* Light green background for pickup address */
+        }
         #map {
             height: 400px;
             width: 100%;
@@ -48,7 +54,7 @@
         <label for="pickupDate">Pickup Date:</label>
         <input type="date" id="pickupDate" name="pickupDate" required>
 
-        <label for="pickupLocation">Pickup Location:</label>
+        <label id="pickupLocationLabel" for="pickupLocation">Pickup Location:</label>
         <input type="text" id="pickupLocation" name="pickupLocation" required>
 
         <label for="dropoffLocation">Drop-off Location:</label>
@@ -168,17 +174,6 @@
                     response.routes[0].legs[0].via_waypoints.forEach(waypoint => {
                         bounds.extend(waypoint.location);
                     });
-                    bounds.extend(response.routes[0].legs[0].start_location);
-                    bounds.extend(response.routes[0].legs[0].end_location);
-                    map.fitBounds(bounds);
-                } else {
-                    console.error("Directions request failed due to", status);
-                }
-            });
-        }
+                    bounds.extend(response
 
-        window.onload = initMap;
-    </script>
-</body>
-</html>
 
