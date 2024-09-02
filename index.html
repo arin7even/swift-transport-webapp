@@ -52,9 +52,11 @@
         const dropoff = document.getElementById('dropoffLocation').value;
 
         const message = `New ride booking:\nTime: ${time}\nDate: ${date}\nPickup: ${pickup}\nDrop-off: ${dropoff}`;
+        console.log("Sending message:", message); // Debugging log
 
-        // Replace YOUR_CHAT_ID with your actual chat ID
-        const url = `https://api.telegram.org/bot7352298732:AAHl1I3HKUch12qrb3EvC7e8wOBG0JHnTDI/sendMessage?chat_id=104897472&text=${encodeURIComponent(message)}`;
+        // Use your actual chat ID
+        const chatId = 104897472; // Your chat ID
+        const url = `https://api.telegram.org/bot7352298732:AAHl1I3HKUch12qrb3EvC7e8wOBG0JHnTDI/sendMessage?chat_id=${chatId}&text=${encodeURIComponent(message)}`;
 
         // Send the message using fetch
         fetch(url)
@@ -62,6 +64,7 @@
                 if (response.ok) {
                     alert('Your booking is confirmed and sent to Telegram!');
                 } else {
+                    console.error('Error sending message:', response.status, response.statusText);
                     alert('Error booking ride.');
                 }
             })
@@ -70,6 +73,7 @@
                 alert('Error sending message.');
             });
 </script>
+
 
 </body>
 </html>
