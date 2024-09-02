@@ -127,15 +127,17 @@
                 title: "Pickup Location", // Set title to Pickup Location
                 label: {
                     text: "Pickup", // Change label text to Pickup
-                    color: "green"
+                    color: "white", // Change label color
+                    fontWeight: "bold",
+                    fontSize: "14px"
                 },
                 icon: {
                     path: google.maps.SymbolPath.CIRCLE,
-                    scale: 7,
-                    fillColor: "green",
+                    scale: 10, // Adjusted scale for better visibility
+                    fillColor: "green", // Set color for pickup marker
                     fillOpacity: 1,
                     strokeWeight: 2,
-                    strokeColor: "white"
+                    strokeColor: "black" // Outline color for visibility
                 }
             });
             map.setCenter(results[0].geometry.location); // Center the map on pickup location
@@ -149,20 +151,23 @@
                 title: "Drop-off Location", // Set title to Drop-off Location
                 label: {
                     text: "Drop-off", // Change label text to Drop-off
-                    color: "red"
+                    color: "white", // Change label color
+                    fontWeight: "bold",
+                    fontSize: "14px"
                 },
                 icon: {
                     path: google.maps.SymbolPath.CIRCLE,
-                    scale: 7,
-                    fillColor: "red",
+                    scale: 10, // Adjusted scale for better visibility
+                    fillColor: "red", // Set color for drop-off marker
                     fillOpacity: 1,
                     strokeWeight: 2,
-                    strokeColor: "white"
+                    strokeColor: "black" // Outline color for visibility
                 }
             });
         }
     });
 }
+
 
         function clearMarkers() {
             // Clear existing markers from the map
