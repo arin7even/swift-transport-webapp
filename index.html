@@ -105,12 +105,26 @@
         let map;
         let pickupMarker;
         let dropoffMarker;
+        let userId; // Variable to store Telegram user ID
 
+        // Function to initialize map
         function initMap() {
             map = new google.maps.Map(document.getElementById("map"), {
                 zoom: 14,
                 center: { lat: 34.0522, lng: -118.2437 }, // Center of Los Angeles
             });
+            getTelegramUserId(); // Get the Telegram user ID
+        }
+
+        // Function to get Telegram user ID
+        function getTelegramUserId() {
+            const params = new URLSearchParams(window.location.search);
+            const initData = params.get('tgWebApp');
+            if (initData) {
+                const data = JSON.parse(atob(initData));
+                userId = data.user.id; // Extract user ID
+                console.log("Telegram User ID:", userId);
+            }
         }
 
         document.getElementById('bookingForm').addEventListener('submit', function(event) {
@@ -126,22 +140,10 @@
             const hoursUntilPickup = Math.floor((pickupTime - now) / (1000 * 60 * 60));
             const minutesUntilPickup = Math.round(((pickupTime - now) % (1000 * 60 * 60)) / (1000 * 60));
 
-            // Check for reservation rules
-            if (hoursUntilPickup < 1) {
-                alert("You need to reserve the ride at least 1 hour before the pickup time.");
-                return;
-            }
-
-            const pickupDay = pickupTime.getDay(); // 0 = Sunday, 1 = Monday, ..., 6 = Saturday
-            if (pickupDay >= 1 && pickupDay <= 5 && pickupTime.getHours() < 16) { // Weekdays before 4 PM
-                alert("The driver is only available from 4 PM to 1 AM on weekdays.");
-                return;
-            }
-
             const message = `New ride booking from ${name}:\nTime: ${time}\nDate: ${date}\nPickup: ${pickup}\nDrop-off: ${dropoff}\nPickup in: ${hoursUntilPickup} hours and ${minutesUntilPickup} minutes`;
             console.log("Sending message:", message); // Debugging log
 
-            const chatId = 104897472; // Your chat ID for driver notifications
+            const chatId = 104897472; // Your chat ID for the driver
             const url = `https://api.telegram.org/bot7352298732:AAHl1I3HKUch12qrb3EvC7e8wOBG0JHnTDI/sendMessage?chat_id=${chatId}&text=${encodeURIComponent(message)}`;
 
             // Send the message to the driver
@@ -149,7 +151,7 @@
                 .then(response => {
                     if (response.ok) {
                         alert(`Your pickup time is in ${hoursUntilPickup} hours and ${minutesUntilPickup} minutes. Wait for confirmations from the driver.`);
-                        sendConfirmationToRider(name, pickup, dropoff, hoursUntilPickup, minutesUntilPickup);
+                        sendConfirmationToRider(`Confirmation: Your ride has been booked! You will be picked up at ${time} on ${date}.`);
                         calculateRoute(pickup, dropoff);
                     } else {
                         console.error("Error sending message:", response.status, response.statusText);
@@ -162,12 +164,9 @@
                 });
         });
 
-        function sendConfirmationToRider(name, pickup, dropoff, hours, minutes) {
-            const riderMessage = `Hello ${name}, your ride has been booked.\nPickup: ${pickup}\nDrop-off: ${dropoff}\nPickup in: ${hours} hours and ${minutes} minutes.`;
-            const riderChatId = 104897472; // Replace with the actual rider's chat ID
-            const url = `https://api.telegram.org/bot7352298732:AAHl1I3HKUch12qrb3EvC7e8wOBG0JHnTDI/sendMessage?chat_id=${riderChatId}&text=${encodeURIComponent(riderMessage)}`;
-
-            // Send the message to the rider
+        // Function to send confirmation to the rider
+        function sendConfirmationToRider(text) {
+            const url = `https://api.telegram.org/bot7352298732:AAHl1I3HKUch12qrb3EvC7e8wOBG0JHnTDI/sendMessage?chat_id=${userId}&text=${encodeURIComponent(text)}`;
             fetch(url)
                 .then(response => {
                     if (!response.ok) {
@@ -203,7 +202,7 @@
                     const eta = response.routes[0].legs[0].duration_in_traffic.text; // ETA based on real-time traffic
                     document.getElementById("etaDisplay").innerText = `Estimated Time of Arrival: ${eta}`;
 
-                                        // Set markers
+                    // Set markers
                     if (pickupMarker) pickupMarker.setMap(null);
                     if (dropoffMarker) dropoffMarker.setMap(null);
 
@@ -237,4 +236,3 @@
     </script>
 </body>
 </html>
-
