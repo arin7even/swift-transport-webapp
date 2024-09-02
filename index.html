@@ -10,7 +10,6 @@
             margin: 0;
             padding: 20px;
             background-color: #f4f4f4;
-            text-align: center;
         }
         h1 {
             color: #333;
@@ -18,25 +17,19 @@
         form {
             display: flex;
             flex-direction: column;
-            align-items: center;
         }
         input, button {
             margin: 10px 0;
             padding: 10px;
             font-size: 16px;
-            width: 300px;
         }
-        button {
-            cursor: pointer;
-            background-color: #4CAF50; /* Green */
-            color: white;
-            border: none;
-            border-radius: 5px;
-        }
-        button:hover {
-            background-color: #45a049;
+        #map {
+            height: 400px; /* Set the height for the map */
+            margin-top: 20px;
+            border: 1px solid #ccc;
         }
     </style>
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBsqYdVFXJcuUpxwkIEPJxEAGN2jlf-tT4"></script>
 </head>
 <body>
     <h1>Book Your Ride</h1>
@@ -48,17 +41,33 @@
         <input type="date" id="pickupDate" name="pickupDate" required>
 
         <label for="pickupLocation">Pickup Location:</label>
-        <input type="text" id="pickupLocation" name="pickupLocation" placeholder="Enter pickup location" required>
+        <input type="text" id="pickupLocation" name="pickupLocation" required>
 
         <label for="dropoffLocation">Drop-off Location:</label>
-        <input type="text" id="dropoffLocation" name="dropoffLocation" placeholder="Enter drop-off location" required>
+        <input type="text" id="dropoffLocation" name="dropoffLocation" required>
 
         <button type="submit">Confirm Booking</button>
     </form>
 
+    <div id="map"></div> <!-- Map container -->
+
     <script>
         const chatId = 104897472; // Your Telegram ID
         const botToken = '7352298732:AAHl1I3HKUch12qrb3EvC7e8wOBG0JHnTDI'; // Your bot token
+
+        // Initialize and add the map
+        function initMap() {
+            const map = new google.maps.Map(document.getElementById("map"), {
+                zoom: 10,
+                center: { lat: 34.0522, lng: -118.2437 } // Default center to Los Angeles
+            });
+
+            const marker = new google.maps.Marker({
+                position: { lat: 34.0522, lng: -118.2437 }, // Default marker position
+                map: map,
+                title: "Pickup Location"
+            });
+        }
 
         document.getElementById('bookingForm').addEventListener('submit', function(event) {
             event.preventDefault();
@@ -87,6 +96,9 @@
                     alert('Error sending message.');
                 });
         });
+
+        // Call the initMap function to display the map
+        window.onload = initMap;
     </script>
 </body>
 </html>
