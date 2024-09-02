@@ -6,44 +6,58 @@
     <title>Swift Transport Booking</title>
     <style>
         body {
-            font-family: Arial, sans-serif;
+            font-family: 'Arial', sans-serif;
             margin: 0;
             padding: 20px;
-            background-color: #181818;
-            color: white; /* Change text color for better visibility in dark mode */
+            background-color: #2c2c2c; /* Dark mode background */
+            color: #fff; /* Light text for better contrast */
         }
         h1 {
-            color: #00b300; /* Header color */
+            color: #fff;
+            text-align: center;
         }
         form {
             display: flex;
             flex-direction: column;
+            max-width: 500px;
+            margin: 0 auto; /* Center form on the page */
+            padding: 20px;
+            border-radius: 8px;
+            background-color: #3a3a3a; /* Darker background for form */
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Shadow effect */
         }
         label {
-            margin: 10px 0 5px;
+            margin-bottom: 5px;
         }
         input, button {
             margin: 10px 0;
             padding: 10px;
             font-size: 16px;
-            border: 1px solid #00b300; /* Green border */
-            border-radius: 5px;
+            border-radius: 4px;
+            border: 1px solid #555; /* Border color */
+            transition: border-color 0.3s, box-shadow 0.3s; /* Smooth transition */
         }
-        input[type="text"] {
-            background-color: #2e2e2e; /* Darker background for text inputs */
-            color: white; /* Text color for input */
-        }
-        input[type="text"]:focus {
-            border-color: #00b300; /* Focus border color */
-            outline: none; /* Remove default outline */
+        input:focus {
+            border-color: #80ff72; /* Light green border on focus */
+            box-shadow: 0 0 5px rgba(128, 255, 114, 0.5); /* Shadow on focus */
         }
         button {
             background-color: #007bff; /* Blue button */
-            color: white; /* Button text color */
+            color: white;
+            border: none;
             cursor: pointer;
+            transition: background-color 0.3s; /* Smooth transition */
         }
         button:hover {
             background-color: #0056b3; /* Darker blue on hover */
+        }
+        #pickupLocation {
+            background-color: #80ff72; /* Light green background for pickup */
+            color: #333; /* Dark text for readability */
+        }
+        #dropoffLocation {
+            background-color: #ff7f7f; /* Light red background for drop-off */
+            color: #333; /* Dark text for readability */
         }
         #map {
             height: 400px;
@@ -54,7 +68,11 @@
             margin-top: 20px;
             font-size: 18px;
             font-weight: bold;
-            color: green; /* ETA text color */
+            background-color: #444; /* Darker background for ETA display */
+            padding: 10px;
+            border-radius: 4px;
+            text-align: center;
+            color: #80ff72; /* Green text for ETA display */
         }
     </style>
     <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBsqYdVFXJcuUpxwkIEPJxEAGN2jlf-tT4"></script>
@@ -87,25 +105,12 @@
         let map;
         let pickupMarker;
         let dropoffMarker;
-        let userId; // Variable to store Telegram user ID
 
-        // Function to initialize map
         function initMap() {
             map = new google.maps.Map(document.getElementById("map"), {
                 zoom: 14,
                 center: { lat: 34.0522, lng: -118.2437 }, // Center of Los Angeles
             });
-        }
-
-        // Function to get Telegram user ID
-        function getTelegramUserId() {
-            const params = new URLSearchParams(window.location.search);
-            const initData = params.get('tgWebApp');
-            if (initData) {
-                const data = JSON.parse(atob(initData));
-                userId = data.user.id; // Extract user ID
-                console.log("Telegram User ID:", userId);
-            }
         }
 
         document.getElementById('bookingForm').addEventListener('submit', function(event) {
@@ -116,54 +121,63 @@
             const pickup = document.getElementById('pickupLocation').value;
             const dropoff = document.getElementById('dropoffLocation').value;
 
-            // Validate pickup time
-            const pickupDateTime = new Date(`${date}T${time}`);
+            const pickupTime = new Date(`${date}T${time}`);
             const now = new Date();
+            const hoursUntilPickup = Math.floor((pickupTime - now) / (1000 * 60 * 60));
+            const minutesUntilPickup = Math.round(((pickupTime - now) % (1000 * 60 * 60)) / (1000 * 60));
 
-            // Check if ride is booked at least 1 hour in advance
-            const oneHourInMs = 60 * 60 * 1000;
-            if (pickupDateTime - now < oneHourInMs) {
+            // Check for reservation rules
+            if (hoursUntilPickup < 1) {
                 alert("You need to reserve the ride at least 1 hour before the pickup time.");
                 return;
             }
 
-            // Check if the pickup time is before 4 PM on weekdays
-            const pickupHour = pickupDateTime.getHours();
-            const pickupDay = pickupDateTime.getDay(); // 0 = Sunday, 1 = Monday, ..., 6 = Saturday
-            if (pickupDay >= 1 && pickupDay <= 5 && pickupHour < 16) { // Weekdays before 4 PM
+            const pickupDay = pickupTime.getDay(); // 0 = Sunday, 1 = Monday, ..., 6 = Saturday
+            if (pickupDay >= 1 && pickupDay <= 5 && pickupTime.getHours() < 16) { // Weekdays before 4 PM
                 alert("The driver is only available from 4 PM to 1 AM on weekdays.");
                 return;
             }
 
-            const message = `New ride booking from ${name}:\nTime: ${time}\nDate: ${date}\nPickup: ${pickup}\nDrop-off: ${dropoff}`;
+            const message = `New ride booking from ${name}:\nTime: ${time}\nDate: ${date}\nPickup: ${pickup}\nDrop-off: ${dropoff}\nPickup in: ${hoursUntilPickup} hours and ${minutesUntilPickup} minutes`;
             console.log("Sending message:", message); // Debugging log
 
-            const chatId = 104897472; // Your chat ID
-            const driverMessage = `New ride booking from ${name}:\nTime: ${time}\nDate: ${date}\nPickup: ${pickup}\nDrop-off: ${dropoff}\nPickup in: ${Math.floor((pickupDateTime - now) / (1000 * 60 * 60))} hour(s) and ${Math.round((pickupDateTime - now) / (1000 * 60))} minute(s)`;
-            const url = `https://api.telegram.org/bot7352298732:AAHl1I3HKUch12qrb3EvC7e8wOBG0JHnTDI/sendMessage?chat_id=${chatId}&text=${encodeURIComponent(driverMessage)}`;
+            const chatId = 104897472; // Your chat ID for driver notifications
+            const url = `https://api.telegram.org/bot7352298732:AAHl1I3HKUch12qrb3EvC7e8wOBG0JHnTDI/sendMessage?chat_id=${chatId}&text=${encodeURIComponent(message)}`;
 
-            // Send the message using fetch
+            // Send the message to the driver
             fetch(url)
                 .then(response => {
                     if (response.ok) {
-                        const hoursUntilPickup = Math.floor((pickupDateTime - now) / (1000 * 60 * 60));
-                        const minutesUntilPickup = Math.round((pickupDateTime - now) / (1000 * 60)) % 60;
                         alert(`Your pickup time is in ${hoursUntilPickup} hours and ${minutesUntilPickup} minutes. Wait for confirmations from the driver.`);
+                        sendConfirmationToRider(name, pickup, dropoff, hoursUntilPickup, minutesUntilPickup);
                         calculateRoute(pickup, dropoff);
                     } else {
                         console.error("Error sending message:", response.status, response.statusText);
                         alert("Error booking ride.");
                     }
                 })
-                .then(() => {
-                    // Reset form fields
-                    document.getElementById('bookingForm').reset();
-                })
                 .catch(error => {
                     console.error("Error:", error);
                     alert("Error sending message.");
                 });
         });
+
+        function sendConfirmationToRider(name, pickup, dropoff, hours, minutes) {
+            const riderMessage = `Hello ${name}, your ride has been booked.\nPickup: ${pickup}\nDrop-off: ${dropoff}\nPickup in: ${hours} hours and ${minutes} minutes.`;
+            const riderChatId = 104897472; // Replace with the actual rider's chat ID
+            const url = `https://api.telegram.org/bot7352298732:AAHl1I3HKUch12qrb3EvC7e8wOBG0JHnTDI/sendMessage?chat_id=${riderChatId}&text=${encodeURIComponent(riderMessage)}`;
+
+            // Send the message to the rider
+            fetch(url)
+                .then(response => {
+                    if (!response.ok) {
+                        console.error("Error sending confirmation to rider:", response.status, response.statusText);
+                    }
+                })
+                .catch(error => {
+                    console.error("Error:", error);
+                });
+        }
 
         function calculateRoute(pickup, dropoff) {
             const directionsService = new google.maps.DirectionsService();
@@ -189,11 +203,38 @@
                     const eta = response.routes[0].legs[0].duration_in_traffic.text; // ETA based on real-time traffic
                     document.getElementById("etaDisplay").innerText = `Estimated Time of Arrival: ${eta}`;
 
-                    // Set markers
+                                        // Set markers
                     if (pickupMarker) pickupMarker.setMap(null);
                     if (dropoffMarker) dropoffMarker.setMap(null);
 
                     pickupMarker = new google.maps.Marker({
                         position: response.routes[0].legs[0].start_location,
                         map: map,
-                        icon: 'https://cdn1.iconfinder.com/data/icons/basic-ui-elements-coloricon/21/06_1-64.png' // Green car icon
+                        icon: 'https://cdn1.iconfinder.com/data/icons/basic-ui-elements-coloricon/21/06_1-64.png' // Green car icon for pickup
+                    });
+
+                    dropoffMarker = new google.maps.Marker({
+                        position: response.routes[0].legs[0].end_location,
+                        map: map,
+                        icon: 'https://cdn1.iconfinder.com/data/icons/social-messaging-ui-color/254000/67-64.png' // Red car icon for drop-off
+                    });
+
+                    // Center the map on the route
+                    const bounds = new google.maps.LatLngBounds();
+                    response.routes[0].legs[0].via_waypoints.forEach(waypoint => {
+                        bounds.extend(waypoint.location);
+                    });
+                    bounds.extend(response.routes[0].legs[0].start_location);
+                    bounds.extend(response.routes[0].legs[0].end_location);
+                    map.fitBounds(bounds);
+                } else {
+                    console.error("Directions request failed due to", status);
+                }
+            });
+        }
+
+        window.onload = initMap;
+    </script>
+</body>
+</html>
+
