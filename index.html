@@ -54,12 +54,6 @@
         button:hover:enabled {
             background-color: #0056b3; /* Darker blue on hover */
         }
-        #confirmRideBtn {
-            background-color: #28a745; /* Green button */
-        }
-        #cancelBtn {
-            background-color: #dc3545; /* Red button */
-        }
         .blinking {
             background-color: #6c757d; /* Grey button */
             color: white;
@@ -109,12 +103,10 @@
     <h1>Book Your Ride</h1>
     <form id="bookingForm">
         <label for="name">Your Name:</label>
-        <small>(Needed for further confirmations from the driver)</small>
         <input type="text" id="name" name="name" required>
 
-        <label for="phone">Phone Number:</label>
+        <label for="phone">Phone Number:<small>(Needed for further confirmations from the driver)</small></label>
         <input type="text" id="phone" name="phone" required>
-        
 
         <label for="pickupTime">Pickup Time (HH:MM):</label>
         <input type="time" id="pickupTime" name="pickupTime" required>
@@ -189,6 +181,10 @@
                     document.getElementById('confirmInfoBtn').style.display = 'none'; // Hide confirm info button
                     document.getElementById('confirmRideBtn').disabled = false; // Enable confirm ride button
                     document.getElementById('cancelBtn').disabled = false; // Enable cancel button
+
+                    // Change button colors
+                    document.getElementById('confirmRideBtn').style.backgroundColor = '#28a745'; // Green for confirm ride
+                    document.getElementById('cancelBtn').style.backgroundColor = '#dc3545'; // Red for cancel
                 } else {
                     console.error("Directions request failed due to", status);
                 }
