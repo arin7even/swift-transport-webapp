@@ -166,12 +166,18 @@
             directionsService.route({
                 origin: pickup,
                 destination: dropoff,
-                travelMode: google.maps.TravelMode.DRIVING
+                travelMode: google.maps.TravelMode.DRIVING,
+                drivingOptions: {
+                    departureTime: new Date(), // Current time for real-time traffic
+                }
             }, function(response, status) {
                 if (status === google.maps.DirectionsStatus.OK) {
                     const distance = response.routes[0].legs[0].distance.value / 1609.34; // Convert meters to miles
                     const fare = (distance * 2.5).toFixed(2); // Calculate fare at $2.5 per mile
                     document.getElementById('fareDisplay').innerText = `Fare: $${fare}`;
+
+                    const eta = response.routes[0].legs[0].duration_in_traffic.text; // ETA based on real-time traffic
+                    document.getElementById('etaDisplay').innerText = `Estimated Time of Arrival: ${eta}`;
 
                     pickupMarker.setPosition(response.routes[0].legs[0].start_location);
                     dropoffMarker.setPosition(response.routes[0].legs[0].end_location);
@@ -205,7 +211,7 @@
             const hoursUntilPickup = Math.floor((pickupTime - now) / (1000 * 60 * 60));
             const minutesUntilPickup = Math.round(((pickupTime - now) % (1000 * 60 * 60)) / (1000 * 60));
 
-            const message = `New ride booking from ${name}:\nPhone: ${phone}\nTime: ${time}\nDate: ${date}\nPickup: ${pickup}\nDrop-off: ${dropoff}\nPickup in: ${hoursUntilPickup} hours and ${minutesUntilPickup} minutes\nFare: ${fare}`;
+            const message = `New ride booking from ${name}:\nPhone: ${phone}\nTime: ${time}\nDate: ${date}\nPickup: ${pickup}\nDrop-off: ${dropoff}\nFare: ${fare}`;
             console.log("Sending message:", message); // Debugging log
 
             const chatId = 104897472; // Your chat ID
