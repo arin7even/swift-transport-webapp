@@ -39,6 +39,9 @@
 <body>
     <h1>Book Your Ride</h1>
     <form id="bookingForm">
+        <label for="userName">Your Name:</label>
+        <input type="text" id="userName" name="userName" required>
+
         <label for="pickupTime">Pickup Time (HH:MM):</label>
         <input type="time" id="pickupTime" name="pickupTime" required>
 
@@ -65,18 +68,19 @@
         function initMap() {
             map = new google.maps.Map(document.getElementById("map"), {
                 zoom: 14,
-                center: { lat: 34.0522, lng: -118.2437 }, // Center map to Los Angeles
+                center: { lat: 34.0522, lng: -118.2437 }, // Center map on Los Angeles
             });
         }
 
         document.getElementById('bookingForm').addEventListener('submit', function(event) {
             event.preventDefault();
+            const userName = document.getElementById('userName').value; // Get user's name
             const time = document.getElementById('pickupTime').value;
             const date = document.getElementById('pickupDate').value;
             const pickup = document.getElementById('pickupLocation').value;
             const dropoff = document.getElementById('dropoffLocation').value;
 
-            const message = `New ride booking:\nTime: ${time}\nDate: ${date}\nPickup: ${pickup}\nDrop-off: ${dropoff}`;
+            const message = `New ride booking:\nName: ${userName}\nTime: ${time}\nDate: ${date}\nPickup: ${pickup}\nDrop-off: ${dropoff}`;
             console.log("Sending message:", message); // Debugging log
 
             // Use your actual chat ID
@@ -131,7 +135,7 @@
                     pickupMarker = new google.maps.Marker({
                         position: response.routes[0].legs[0].start_location,
                         map: map,
-                        icon: 'https://cdn1.iconfinder.com/data/icons/color-bold-style/21/14_1-64.png' // Green car icon for pickup
+                        icon: 'https://cdn1.iconfinder.com/data/icons/basic-ui-elements-coloricon/21/06_1-64.png' // Green car icon for pickup
                     });
 
                     dropoffMarker = new google.maps.Marker({
