@@ -108,11 +108,14 @@
                     if (response.ok) {
                         alert(`Your pickup time is in ${hoursUntilPickup} hour(s) and ${minutesUntilPickup} minute(s). Wait for confirmations from the driver.`);
                         calculateRoute(pickup, dropoff);
-                        document.getElementById('bookingForm').reset(); // Reset form fields
                     } else {
                         console.error("Error sending message:", response.status, response.statusText);
                         alert("Error booking ride.");
                     }
+                })
+                .then(() => {
+                    // Reset form fields
+                    document.getElementById('bookingForm').reset();
                 })
                 .catch(error => {
                     console.error("Error:", error);
