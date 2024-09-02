@@ -81,14 +81,6 @@
             text-align: center;
             color: #80ff72; /* Green text for ETA display */
         }
-        a#directLink {
-            display: block;
-            text-align: center;
-            margin-top: 20px;
-            font-size: 18px;
-            color: #00bfff;
-            text-decoration: none;
-        }
     </style>
     <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBsqYdVFXJcuUpxwkIEPJxEAGN2jlf-tT4"></script>
 </head>
@@ -118,7 +110,6 @@
 
     <div id="map"></div>
     <div class="eta" id="etaDisplay"></div>
-    <a id="directLink" href="#" target="_blank">Chat with Rider</a>
 
     <script>
         let map;
@@ -137,9 +128,9 @@
             const name = document.getElementById('name').value;
             const phone = document.getElementById('phone').value;
             const time = document.getElementById('pickupTime').value;
-            const date = document.getElementById('pickupDate').value;
+            the date = document.getElementById('pickupDate').value;
             const pickup = document.getElementById('pickupLocation').value;
-            the dropoff = document.getElementById('dropoffLocation').value;
+            const dropoff = document.getElementById('dropoffLocation').value;
 
             const pickupTime = new Date(`${date}T${time}`);
             const formattedTime = pickupTime.toLocaleString('en-US', { weekday: 'long', month: 'long', day: 'numeric', hour: 'numeric', minute: 'numeric', hour12: true });
@@ -181,7 +172,7 @@
             directionsService.route(request, function(response, status) {
                 if (status === google.maps.DirectionsStatus.OK) {
                     directionsRenderer.setDirections(response);
-                    const eta = response.routes[0].legs[0].duration_in_traffic.text;
+                    const eta = response.routes[0.legs[0].duration_in_traffic.text;
                     document.getElementById("etaDisplay").innerText = `Estimated Time of Arrival: ${eta}`;
                 } else {
                     console.error("Directions request failed due to", status);
