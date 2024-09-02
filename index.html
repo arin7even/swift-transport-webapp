@@ -28,6 +28,13 @@
         }
         label {
             margin-bottom: 5px;
+            display: flex;
+            align-items: center; /* Align label and small text */
+        }
+        .small-text {
+            font-size: 0.8em;
+            color: #80ff72; /* Light green color for notes */
+            margin-left: 5px; /* Space between label and note */
         }
         input, button {
             margin: 10px 0;
@@ -51,8 +58,12 @@
         button:hover {
             background-color: #0056b3; /* Darker blue on hover */
         }
-        #pickupLocation, #dropoffLocation {
-            background-color: #f3f3f3; /* Light background for better readability */
+        #pickupLocation {
+            background-color: #80ff72; /* Light green background for pickup */
+            color: #333; /* Dark text for readability */
+        }
+        #dropoffLocation {
+            background-color: #ff7f7f; /* Light red background for drop-off */
             color: #333; /* Dark text for readability */
         }
         #map {
@@ -87,9 +98,8 @@
         <label for="name">Your Name:</label>
         <input type="text" id="name" name="name" required>
 
-        <label for="phone">Phone Number:</label>
+        <label for="phone">Phone Number:<span class="small-text">(Needed for further confirmations from the driver)</span></label>
         <input type="text" id="phone" name="phone" required>
-        <div class="small-text">(Needed for further confirmations from the driver)</div>
 
         <label for="pickupTime">Pickup Time (HH:MM):</label>
         <input type="time" id="pickupTime" name="pickupTime" required>
@@ -132,10 +142,11 @@
             const dropoff = document.getElementById('dropoffLocation').value;
 
             const pickupTime = new Date(`${date}T${time}`);
-            const formattedTime = pickupTime.toLocaleString('en-US', { weekday: 'long', month: 'long', day: 'numeric', hour: 'numeric', minute: 'numeric', hour12: true });
-            alert(`Your pickup is scheduled for ${formattedTime}.`);
+            const now = new Date();
+            const hoursUntilPickup = Math.floor((pickupTime - now) / (1000 * 60 * 60));
+            const minutesUntilPickup = Math.round(((pickupTime - now) % (1000 * 60 * 60)) / (1000 * 60));
 
-            const message = `New ride booking from ${name}:\nPhone: ${phone}\nScheduled Time: ${formattedTime}\nPickup: ${pickup}\nDrop-off: ${dropoff}`;
+            const message = `New ride booking from ${name}:\nPhone: ${phone}\nTime: ${time}\nDate: ${date}\nPickup: ${pickup}\nDrop-off: ${dropoff}\nPickup in: ${hoursUntilPickup} hours and ${minutesUntilPickup} minutes`;
             console.log("Sending message:", message); // Debugging log
 
             const chatId = 104897472; // Your chat ID
@@ -144,6 +155,7 @@
             fetch(url)
                 .then(response => {
                     if (response.ok) {
+                        alert(`Your pickup is scheduled for ${formattedTime}.`);
                         calculateRoute(pickup, dropoff);
                     } else {
                         console.error("Error sending message:", response.status, response.statusText);
