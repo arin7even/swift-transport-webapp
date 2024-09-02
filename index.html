@@ -54,19 +54,19 @@
     <script>
         const chatId = 104897472; // Your Telegram ID
         const botToken = '7352298732:AAHl1I3HKUch12qrb3EvC7e8wOBG0JHnTDI'; // Your bot token
+        let map;
+        let directionsService;
+        let directionsRenderer;
 
         // Initialize and add the map
         function initMap() {
-            const map = new google.maps.Map(document.getElementById("map"), {
+            map = new google.maps.Map(document.getElementById("map"), {
                 zoom: 10,
                 center: { lat: 34.0522, lng: -118.2437 } // Default center to Los Angeles
             });
-
-            const marker = new google.maps.Marker({
-                position: { lat: 34.0522, lng: -118.2437 }, // Default marker position
-                map: map,
-                title: "Pickup Location"
-            });
+            directionsService = new google.maps.DirectionsService();
+            directionsRenderer = new google.maps.DirectionsRenderer();
+            directionsRenderer.setMap(map);
         }
 
         document.getElementById('bookingForm').addEventListener('submit', function(event) {
@@ -87,6 +87,7 @@
                     if (response.ok) {
                         alert("You are all set! You'll receive a confirmation from the driver soon.");
                         document.getElementById('bookingForm').reset(); // Reset the form after submission
+                        displayRoute(pickup, dropoff);
                     } else {
                         alert('Error booking ride.');
                     }
@@ -96,6 +97,59 @@
                     alert('Error sending message.');
                 });
         });
+
+        function displayRoute(pickup, dropoff) {
+            directionsService.route({
+                origin: pickup,
+                destination: dropoff,
+                travelMode: google.maps.TravelMode.DRIVING
+            }, (response, status) => {
+                if (status === 'OK') {
+                    directionsRenderer.setDirections(response);
+                    addMarkers(pickup, dropoff);
+                } else {
+                    window.alert('Directions request failed due to ' + status);
+                }
+            });
+        }
+
+        function addMarkers(pickup, dropoff) {
+            const geocoder = new google.maps.Geocoder();
+            geocoder.geocode({ address: pickup }, (results, status) => {
+                if (status === 'OK') {
+                    new google.maps.Marker({
+                        position: results[0].geometry.location,
+                        map: map,
+                        title: "Pickup Location",
+                        icon: {
+                            path: google.maps.SymbolPath.CIRCLE,
+                            scale: 7,
+                            fillColor: "green",
+                            fillOpacity: 1,
+                            strokeWeight: 2,
+                            strokeColor: "white"
+                        }
+                    });
+                }
+            });
+            geocoder.geocode({ address: dropoff }, (results, status) => {
+                if (status === 'OK') {
+                    new google.maps.Marker({
+                        position: results[0].geometry.location,
+                        map: map,
+                        title: "Drop-off Location",
+                        icon: {
+                            path: google.maps.SymbolPath.CIRCLE,
+                            scale: 7,
+                            fillColor: "red",
+                            fillOpacity: 1,
+                            strokeWeight: 2,
+                            strokeColor: "white"
+                        }
+                    });
+                }
+            });
+        }
 
         // Call the initMap function to display the map
         window.onload = initMap;
