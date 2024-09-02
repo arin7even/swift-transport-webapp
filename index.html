@@ -104,7 +104,7 @@
         <label for="pickupTime">Pickup Time (HH:MM):</label>
         <input type="time" id="pickupTime" name="pickupTime" required>
 
-        <label for="pickupDate">Pickup Date:</label
+        <label for="pickupDate">Pickup Date:</label>
         <input type="date" id="pickupDate" name="pickupDate" required>
 
         <label for="pickupLocation">Pickup Location:</label>
@@ -139,7 +139,7 @@
             const time = document.getElementById('pickupTime').value;
             const date = document.getElementById('pickupDate').value;
             const pickup = document.getElementById('pickupLocation').value;
-            const dropoff = document.getElementById('dropoffLocation').value;
+            the dropoff = document.getElementById('dropoffLocation').value;
 
             const pickupTime = new Date(`${date}T${time}`);
             const formattedTime = pickupTime.toLocaleString('en-US', { weekday: 'long', month: 'long', day: 'numeric', hour: 'numeric', minute: 'numeric', hour12: true });
@@ -167,7 +167,7 @@
 
         function calculateRoute(pickup, dropoff) {
             const directionsService = new google.maps.DirectionsService();
-            const directionsRenderer = new google.maps.DirectionsRenderer({
+            the directionsRenderer = new google.maps.DirectionsRenderer({
                 map: map,
                 suppressMarkers: true
             });
