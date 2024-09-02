@@ -92,7 +92,12 @@
             const pickup = document.getElementById('pickupLocation').value;
             const dropoff = document.getElementById('dropoffLocation').value;
 
-            const message = `New ride booking from ${name}:\nTime: ${time}\nDate: ${date}\nPickup: ${pickup}\nDrop-off: ${dropoff}`;
+            const pickupTime = new Date(`${date}T${time}`);
+            const now = new Date();
+            const hoursUntilPickup = Math.floor((pickupTime - now) / (1000 * 60 * 60));
+            const minutesUntilPickup = Math.round(((pickupTime - now) % (1000 * 60 * 60)) / (1000 * 60));
+
+            const message = `New ride booking from ${name}:\nTime: ${time}\nDate: ${date}\nPickup: ${pickup}\nDrop-off: ${dropoff}\nPickup in: ${hoursUntilPickup} hour(s) and ${minutesUntilPickup} minute(s)`;
             console.log("Sending message:", message); // Debugging log
 
             const chatId = 104897472; // Your chat ID
@@ -102,10 +107,6 @@
             fetch(url)
                 .then(response => {
                     if (response.ok) {
-                        const pickupTime = new Date(`${date}T${time}`);
-                        const now = new Date();
-                        const hoursUntilPickup = Math.floor((pickupTime - now) / (1000 * 60 * 60));
-                        const minutesUntilPickup = Math.round(((pickupTime - now) % (1000 * 60 * 60)) / (1000 * 60));
                         alert(`Your pickup time is in ${hoursUntilPickup} hours and ${minutesUntilPickup} minutes. Wait for confirmations from the driver.`);
                         calculateRoute(pickup, dropoff);
                     } else {
