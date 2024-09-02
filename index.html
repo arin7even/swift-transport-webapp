@@ -24,9 +24,14 @@
             font-size: 16px;
         }
         #map {
-            height: 400px; /* Set the height for the map */
+            height: 400px;
+            width: 100%;
             margin-top: 20px;
-            border: 1px solid #ccc;
+        }
+        .eta {
+            margin-top: 20px;
+            font-size: 18px;
+            font-weight: bold;
         }
     </style>
     <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBsqYdVFXJcuUpxwkIEPJxEAGN2jlf-tT4"></script>
@@ -49,28 +54,23 @@
         <button type="submit">Confirm Booking</button>
     </form>
 
-    <div id="map"></div> <!-- Map container -->
+    <div id="map"></div>
+    <div class="eta" id="etaDisplay"></div>
 
     <script>
-        const chatId = 104897472; // Your Telegram ID
-        const botToken = '7352298732:AAHl1I3HKUch12qrb3EvC7e8wOBG0JHnTDI'; // Your bot token
         let map;
-        let directionsService;
-        let directionsRenderer;
+        let pickupMarker;
+        let dropoffMarker;
 
-        // Initialize and add the map
         function initMap() {
             map = new google.maps.Map(document.getElementById("map"), {
-                zoom: 10,
-                center: { lat: 34.0522, lng: -118.2437 } // Default center to Los Angeles
+                zoom: 14,
+                center: { lat: 0, lng: 0 }, // Center map initially
             });
-            directionsService = new google.maps.DirectionsService();
-            directionsRenderer = new google.maps.DirectionsRenderer();
-            directionsRenderer.setMap(map);
         }
 
         document.getElementById('bookingForm').addEventListener('submit', function(event) {
-            event.preventDefault(); // Prevent the form from refreshing the page
+            event.preventDefault();
             const time = document.getElementById('pickupTime').value;
             const date = document.getElementById('pickupDate').value;
             const pickup = document.getElementById('pickupLocation').value;
@@ -79,92 +79,82 @@
             const message = `New ride booking:\nTime: ${time}\nDate: ${date}\nPickup: ${pickup}\nDrop-off: ${dropoff}`;
             console.log("Sending message:", message); // Debugging log
 
-            const url = `https://api.telegram.org/bot${botToken}/sendMessage?chat_id=${chatId}&text=${encodeURIComponent(message)}`;
+            // Use your actual chat ID
+            const chatId = 104897472; // Your chat ID
+            const url = `https://api.telegram.org/bot7352298732:AAHl1I3HKUch12qrb3EvC7e8wOBG0JHnTDI/sendMessage?chat_id=${chatId}&text=${encodeURIComponent(message)}`;
 
             // Send the message using fetch
             fetch(url)
                 .then(response => {
                     if (response.ok) {
                         alert("You are all set! You'll receive a confirmation from the driver soon.");
-                        document.getElementById('bookingForm').reset(); // Reset the form after submission
-                        displayRoute(pickup, dropoff);
+                        calculateRoute(pickup, dropoff);
                     } else {
-                        alert('Error booking ride.');
+                        console.error("Error sending message:", response.status, response.statusText);
+                        alert("Error booking ride.");
                     }
                 })
                 .catch(error => {
-                    console.error('Error:', error);
-                    alert('Error sending message.');
+                    console.error("Error:", error);
+                    alert("Error sending message.");
                 });
         });
 
-        function displayRoute(pickup, dropoff) {
-            directionsService.route({
+        function calculateRoute(pickup, dropoff) {
+            const directionsService = new google.maps.DirectionsService();
+            const directionsRenderer = new google.maps.DirectionsRenderer({
+                map: map,
+                suppressMarkers: true // Don't show default markers
+            });
+
+            const request = {
                 origin: pickup,
                 destination: dropoff,
-                travelMode: google.maps.TravelMode.DRIVING
-            }, (response, status) => {
-                if (status === 'OK') {
+                travelMode: google.maps.TravelMode.DRIVING,
+                drivingOptions: {
+                    departureTime: new Date() // Now
+                },
+                unitSystem: google.maps.UnitSystem.METRIC,
+                region: 'US' // Optional: specify your region
+            };
+
+            directionsService.route(request, function(response, status) {
+                if (status === google.maps.DirectionsStatus.OK) {
                     directionsRenderer.setDirections(response);
-                    addMarkers(pickup, dropoff);
+                    const eta = response.routes[0].legs[0].duration_in_traffic.text; // ETA based on real-time traffic
+                    document.getElementById("etaDisplay").innerText = `Estimated Time of Arrival: ${eta}`;
+
+                    // Set markers
+                    if (pickupMarker) pickupMarker.setMap(null);
+                    if (dropoffMarker) dropoffMarker.setMap(null);
+
+                    pickupMarker = new google.maps.Marker({
+                        position: response.routes[0].legs[0].start_location,
+                        map: map,
+                        icon: 'https://cdn1.iconfinder.com/data/icons/basic-ui-elements-coloricon/21/06_1-64.png' // Green car icon for pickup
+                    });
+
+                    dropoffMarker = new google.maps.Marker({
+                        position: response.routes[0].legs[0].end_location,
+                        map: map,
+                        icon: 'https://cdn1.iconfinder.com/data/icons/social-messaging-ui-color/254000/67-64.png' // Red car icon for drop-off
+                    });
+
+                    // Center the map on the route
+                    const bounds = new google.maps.LatLngBounds();
+                    response.routes[0].legs[0].via_waypoints.forEach(waypoint => {
+                        bounds.extend(waypoint.location);
+                    });
+                    bounds.extend(response.routes[0].legs[0].start_location);
+                    bounds.extend(response.routes[0].legs[0].end_location);
+                    map.fitBounds(bounds);
                 } else {
-                    window.alert('Directions request failed due to ' + status);
+                    console.error("Directions request failed due to", status);
                 }
             });
         }
 
-        function addMarkers(pickup, dropoff) {
-    const geocoder = new google.maps.Geocoder();
-
-    // Clear existing markers
-    clearMarkers();
-
-    const pickupIcon = {
-        url: 'https://cdn1.iconfinder.com/data/icons/basic-ui-elements-coloricon/21/06_1-64.png', // URL for green car icon
-        scaledSize: new google.maps.Size(40, 40) // Adjust size as needed
-    };
-
-    const dropoffIcon = {
-        url: 'https://cdn1.iconfinder.com/data/icons/social-messaging-ui-color/254000/67-64.png', // URL for red car icon
-        scaledSize: new google.maps.Size(40, 40) // Adjust size as needed
-    };
-
-    geocoder.geocode({ address: pickup }, (results, status) => {
-        if (status === 'OK') {
-            new google.maps.Marker({
-                position: results[0].geometry.location,
-                map: map,
-                title: "Pickup Location", // Set title to Pickup Location
-                icon: pickupIcon // Use green car icon for pickup
-            });
-            map.setCenter(results[0].geometry.location); // Center the map on pickup location
-        }
-    });
-    
-    geocoder.geocode({ address: dropoff }, (results, status) => {
-        if (status === 'OK') {
-            new google.maps.Marker({
-                position: results[0].geometry.location,
-                map: map,
-                title: "Drop-off Location", // Set title to Drop-off Location
-                icon: dropoffIcon // Use red car icon for drop-off
-            });
-        }
-    });
-}
-
-
-        function clearMarkers() {
-            // Clear existing markers from the map
-            const allMarkers = map.getMarkers();
-            for (let i = 0; i < allMarkers.length; i++) {
-                allMarkers[i].setMap(null);
-            }
-        }
-
-        // Call the initMap function to display the map
         window.onload = initMap;
     </script>
 </body>
 </html>
-
