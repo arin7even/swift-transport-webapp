@@ -6,58 +6,45 @@
     <title>Swift Transport Booking</title>
     <style>
         body {
-            font-family: 'Arial', sans-serif;
+            font-family: Arial, sans-serif;
             margin: 0;
             padding: 20px;
-            background-color: #2c2c2c; /* Dark mode background */
-            color: #fff; /* Light text for better contrast */
+            background-color: #333; /* Dark mode background */
+            color: #fff; /* White text */
         }
         h1 {
-            color: #fff;
-            text-align: center;
+            color: #fff; /* Title color */
         }
         form {
             display: flex;
             flex-direction: column;
-            max-width: 500px;
-            margin: 0 auto; /* Center form on the page */
-            padding: 20px;
-            border-radius: 8px;
-            background-color: #3a3a3a; /* Darker background for form */
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Shadow effect */
-        }
-        label {
-            margin-bottom: 5px;
         }
         input, button {
             margin: 10px 0;
             padding: 10px;
             font-size: 16px;
-            border-radius: 4px;
-            border: 1px solid #555; /* Border color */
-            transition: border-color 0.3s, box-shadow 0.3s; /* Smooth transition */
         }
-        input:focus {
-            border-color: #80ff72; /* Light green border on focus */
-            box-shadow: 0 0 5px rgba(128, 255, 114, 0.5); /* Shadow on focus */
+        input#pickupLocation {
+            background-color: #4CAF50; /* Green background */
+            color: #fff; /* White text */
+            border: none; /* No border */
+            border-radius: 4px; /* Rounded corners */
+        }
+        input#dropoffLocation {
+            background-color: #F44336; /* Red background */
+            color: #fff; /* White text */
+            border: none; /* No border */
+            border-radius: 4px; /* Rounded corners */
         }
         button {
-            background-color: #007bff; /* Blue button */
-            color: white;
-            border: none;
-            cursor: pointer;
-            transition: background-color 0.3s; /* Smooth transition */
+            background-color: #007BFF; /* Blue button */
+            color: white; /* White text */
+            border: none; /* No border */
+            border-radius: 4px; /* Rounded corners */
+            cursor: pointer; /* Pointer cursor */
         }
         button:hover {
-            background-color: #0056b3; /* Darker blue on hover */
-        }
-        #pickupLocation {
-            background-color: #80ff72; /* Light green background for pickup */
-            color: #333; /* Dark text for readability */
-        }
-        #dropoffLocation {
-            background-color: #ff7f7f; /* Light red background for drop-off */
-            color: #333; /* Dark text for readability */
+            opacity: 0.8; /* Slightly transparent on hover */
         }
         #map {
             height: 400px;
@@ -68,11 +55,7 @@
             margin-top: 20px;
             font-size: 18px;
             font-weight: bold;
-            background-color: #444; /* Darker background for ETA display */
-            padding: 10px;
-            border-radius: 4px;
-            text-align: center;
-            color: #80ff72; /* Green text for ETA display */
+            color: green; /* ETA text color */
         }
     </style>
     <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBsqYdVFXJcuUpxwkIEPJxEAGN2jlf-tT4"></script>
@@ -121,12 +104,25 @@
             const pickup = document.getElementById('pickupLocation').value;
             const dropoff = document.getElementById('dropoffLocation').value;
 
-            const pickupTime = new Date(`${date}T${time}`);
-            const now = new Date();
-            const hoursUntilPickup = Math.floor((pickupTime - now) / (1000 * 60 * 60));
-            const minutesUntilPickup = Math.round(((pickupTime - now) % (1000 * 60 * 60)) / (1000 * 60));
+            // Check pickup time and date restrictions
+            const pickupDateTime = new Date(`${date}T${time}`);
+            const currentTime = new Date();
 
-            const message = `New ride booking from ${name}:\nTime: ${time}\nDate: ${date}\nPickup: ${pickup}\nDrop-off: ${dropoff}\nPickup in: ${hoursUntilPickup} hours and ${minutesUntilPickup} minutes`;
+            // Check if reservation is at least 1 hour before the pickup time
+            const oneHourBefore = new Date(pickupDateTime.getTime() - 60 * 60 * 1000);
+            if (currentTime >= oneHourBefore) {
+                alert("You need to reserve the ride at least 1 hour before the pickup time.");
+                return;
+            }
+
+            // Check day of the week (0 = Sunday, 6 = Saturday)
+            const dayOfWeek = pickupDateTime.getDay();
+            if (dayOfWeek >= 1 && dayOfWeek <= 5 && pickupDateTime.getHours() < 16) {
+                alert("The driver is only available from 4 PM to 1 AM on weekdays.");
+                return;
+            }
+
+            const message = `New ride booking from ${name}:\nTime: ${time}\nDate: ${date}\nPickup: ${pickup}\nDrop-off: ${dropoff}`;
             console.log("Sending message:", message); // Debugging log
 
             const chatId = 104897472; // Your chat ID
@@ -136,6 +132,8 @@
             fetch(url)
                 .then(response => {
                     if (response.ok) {
+                        const hoursUntilPickup = Math.floor((pickupDateTime - currentTime) / (1000 * 60 * 60));
+                        const minutesUntilPickup = Math.round(((pickupDateTime - currentTime) % (1000 * 60 * 60)) / (1000 * 60));
                         alert(`Your pickup time is in ${hoursUntilPickup} hours and ${minutesUntilPickup} minutes. Wait for confirmations from the driver.`);
                         calculateRoute(pickup, dropoff);
                     } else {
