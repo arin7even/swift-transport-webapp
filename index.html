@@ -43,16 +43,33 @@
         <button type="submit">Confirm Booking</button>
     </form>
 
-    <script>
-        document.getElementById('bookingForm').addEventListener('submit', function(event) {
-            event.preventDefault();
-            const time = document.getElementById('pickupTime').value;
-            const date = document.getElementById('pickupDate').value;
-            const pickup = document.getElementById('pickupLocation').value;
-            const dropoff = document.getElementById('dropoffLocation').value;
+   <script>
+    document.getElementById('bookingForm').addEventListener('submit', function(event) {
+        event.preventDefault();
+        const time = document.getElementById('pickupTime').value;
+        const date = document.getElementById('pickupDate').value;
+        const pickup = document.getElementById('pickupLocation').value;
+        const dropoff = document.getElementById('dropoffLocation').value;
 
-            alert(`Your booking is confirmed:\nTime: ${time}\nDate: ${date}\nPickup: ${pickup}\nDrop-off: ${dropoff}`);
-        });
-    </script>
+        const message = `New ride booking:\nTime: ${time}\nDate: ${date}\nPickup: ${pickup}\nDrop-off: ${dropoff}`;
+
+        // Replace YOUR_BOT_TOKEN and YOUR_CHAT_ID with your actual bot token and chat ID
+        const url = `https://api.telegram.org/botYOUR_BOT_TOKEN/sendMessage?chat_id=YOUR_CHAT_ID&text=${encodeURIComponent(message)}`;
+
+        // Send the message using fetch
+        fetch(url)
+            .then(response => {
+                if (response.ok) {
+                    alert('Your booking is confirmed and sent to Telegram!');
+                } else {
+                    alert('Error booking ride.');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Error sending message.');
+            });
+</script>
+
 </body>
 </html>
