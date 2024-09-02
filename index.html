@@ -114,47 +114,55 @@
         }
 
         function addMarkers(pickup, dropoff) {
-            const geocoder = new google.maps.Geocoder();
+    const geocoder = new google.maps.Geocoder();
 
-            // Clear existing markers
-            clearMarkers();
+    // Clear existing markers
+    clearMarkers();
 
-            geocoder.geocode({ address: pickup }, (results, status) => {
-                if (status === 'OK') {
-                    new google.maps.Marker({
-                        position: results[0].geometry.location,
-                        map: map,
-                        title: "Pickup Location",
-                        icon: {
-                            path: google.maps.SymbolPath.CIRCLE,
-                            scale: 7,
-                            fillColor: "green",
-                            fillOpacity: 1,
-                            strokeWeight: 2,
-                            strokeColor: "white"
-                        }
-                    });
-                    map.setCenter(results[0].geometry.location); // Center the map on pickup location
+    geocoder.geocode({ address: pickup }, (results, status) => {
+        if (status === 'OK') {
+            new google.maps.Marker({
+                position: results[0].geometry.location,
+                map: map,
+                title: "Pickup Location", // Set title to Pickup Location
+                label: {
+                    text: "Pickup", // Change label text to Pickup
+                    color: "green"
+                },
+                icon: {
+                    path: google.maps.SymbolPath.CIRCLE,
+                    scale: 7,
+                    fillColor: "green",
+                    fillOpacity: 1,
+                    strokeWeight: 2,
+                    strokeColor: "white"
                 }
             });
-            geocoder.geocode({ address: dropoff }, (results, status) => {
-                if (status === 'OK') {
-                    new google.maps.Marker({
-                        position: results[0].geometry.location,
-                        map: map,
-                        title: "Drop-off Location",
-                        icon: {
-                            path: google.maps.SymbolPath.CIRCLE,
-                            scale: 7,
-                            fillColor: "red",
-                            fillOpacity: 1,
-                            strokeWeight: 2,
-                            strokeColor: "white"
-                        }
-                    });
+            map.setCenter(results[0].geometry.location); // Center the map on pickup location
+        }
+    });
+    geocoder.geocode({ address: dropoff }, (results, status) => {
+        if (status === 'OK') {
+            new google.maps.Marker({
+                position: results[0].geometry.location,
+                map: map,
+                title: "Drop-off Location", // Set title to Drop-off Location
+                label: {
+                    text: "Drop-off", // Change label text to Drop-off
+                    color: "red"
+                },
+                icon: {
+                    path: google.maps.SymbolPath.CIRCLE,
+                    scale: 7,
+                    fillColor: "red",
+                    fillOpacity: 1,
+                    strokeWeight: 2,
+                    strokeColor: "white"
                 }
             });
         }
+    });
+}
 
         function clearMarkers() {
             // Clear existing markers from the map
