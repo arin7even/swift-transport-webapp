@@ -135,6 +135,7 @@
         let map;
         let pickupMarker;
         let dropoffMarker;
+        let directionsRenderer;
 
         function initMap() {
             map = new google.maps.Map(document.getElementById("map"), {
@@ -150,6 +151,11 @@
             dropoffMarker = new google.maps.Marker({
                 map: map,
                 icon: 'https://cdn1.iconfinder.com/data/icons/social-messaging-ui-color/254000/67-64.png' // Red car icon for drop-off
+            });
+
+            directionsRenderer = new google.maps.DirectionsRenderer({
+                map: map,
+                suppressMarkers: true // Don't show default markers
             });
         }
 
@@ -168,6 +174,12 @@
                     const distance = response.routes[0].legs[0].distance.value / 1609.34; // Convert meters to miles
                     const fare = (distance * 2.5).toFixed(2); // Calculate fare at $2.5 per mile
                     document.getElementById('fareDisplay').innerText = `Fare: $${fare}`;
+
+                    pickupMarker.setPosition(response.routes[0].legs[0].start_location);
+                    dropoffMarker.setPosition(response.routes[0].legs[0].end_location);
+
+                    directionsRenderer.setDirections(response);
+
                     document.getElementById('confirmInfoBtn').style.display = 'none'; // Hide confirm info button
                     document.getElementById('confirmRideBtn').disabled = false; // Enable confirm ride button
                     document.getElementById('cancelBtn').disabled = false; // Enable cancel button
