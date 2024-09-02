@@ -56,7 +56,7 @@
             color: #333; /* Dark text for readability */
         }
         #dropoffLocation {
-            background-color: #ff7f7f; /* Light red background for drop-off, reverted back to red */
+            background-color: #ff7f7f; /* Light red background for drop-off */
             color: #333; /* Dark text for readability */
         }
         #map {
@@ -127,6 +127,7 @@
                 zoom: 14,
                 center: { lat: 34.0522, lng: -118.2437 }, // Center of Los Angeles
             });
+            // Ensure markers are added at the center initially or a default position
             pickupMarker = new google.maps.Marker({
                 position: map.getCenter(),
                 map: map,
@@ -144,7 +145,7 @@
             const name = document.getElementById('name').value;
             const phone = document.getElementById('phone').value;
             const time = document.getElementById('pickupTime').value;
-            the date = document.getElementById('pickupDate').value;
+            const date = document.getElementById('pickupDate').value;
             const pickup = document.getElementById('pickupLocation').value;
             const dropoff = document.getElementById('dropoffLocation').value;
 
@@ -152,27 +153,35 @@
                 const fare = (distance / 1609.34 * 2.5).toFixed(2); // Convert meters to miles and calculate fare
                 document.getElementById('fareDisplay').textContent = `Your fare is $${fare} based on ${distance / 1609.34.toFixed(2)} miles.`;
                 document.getElementsByClassName('button-group')[0].style.display = 'flex'; // Show buttons
-            });
 
-            // Move markers based on input locations
-            var geocoder = new google.maps.Geocoder();
-            geocoder.geocode({ 'address': pickup }, function(results, status) {
-                if (status == 'OK') {
-                    map.setCenter(results[0].geometry.location);
-                    pickupMarker.setPosition(results[0].geometry.location);
-                } else {
-                    alert('Geocode was not successful for the following reason: ' + status);
-                }
-            });
-
-            geocoder.geocode({ 'address': dropoff }, function(results, status) {
-                if (status == 'OK') {
-                    dropoffMarker.setPosition(results[0].geometry.location);
-                } else {
-                    alert('Geocode was not successful for the following reason: ' + status);
-                }
+                pickupMarker.setPosition(new google.maps.LatLng(response.routes[0].legs[0].start_location.lat(), response.routes[0].legs[0].start_location.lng()));
+                dropoffMarker.setPosition(new google.maps.LatLng(response.routes[0].legs[0].end_location.lat(), response.routes[0].legs[0].end_location.lng()));
             });
         });
+
+        function calculateRoute(pickup, dropoff, callback) {
+            const directionsService = new google.maps.DirectionsService();
+            const directionsRenderer = new google.maps.DirectionsRenderer({
+                map: map,
+                suppressMarkers: true
+            });
+
+            const request = {
+                origin: pickup,
+                destination: dropoff,
+                travelMode: google.maps.TravelMode.DRIVING
+            };
+
+            directionsService.route(request, function(response, status) {
+                if (status === google.maps.DirectionsStatus.OK) {
+                    directionsRenderer.setDirections(response);
+                    const distance = response.routes[0].legs[0].distance.value;
+                    callback(distance);
+                } else {
+                    console.error("Directions request failed due to", status);
+                }
+            });
+        }
 
         document.getElementById('cancelButton').addEventListener('click', function() {
             window.location.reload(); // Reload the page to reset the form
