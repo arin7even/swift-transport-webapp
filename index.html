@@ -51,8 +51,12 @@
         button:hover {
             background-color: #0056b3; /* Darker blue on hover */
         }
-        #pickupLocation, #dropoffLocation {
+        #pickupLocation {
             background-color: #80ff72; /* Light green background for pickup */
+            color: #333; /* Dark text for readability */
+        }
+        #dropoffLocation {
+            background-color: #ff7f7f; /* Light red background for drop-off, reverted back to red */
             color: #333; /* Dark text for readability */
         }
         #map {
@@ -124,10 +128,12 @@
                 center: { lat: 34.0522, lng: -118.2437 }, // Center of Los Angeles
             });
             pickupMarker = new google.maps.Marker({
+                position: map.getCenter(),
                 map: map,
                 icon: 'https://cdn1.iconfinder.com/data/icons/basic-ui-elements-coloricon/21/06_1-64.png' // Green car icon for pickup
             });
             dropoffMarker = new google.maps.Marker({
+                position: map.getCenter(),
                 map: map,
                 icon: 'https://cdn1.iconfinder.com/data/icons/social-messaging-ui-color/254000/67-64.png' // Red car icon for drop-off
             });
@@ -142,42 +148,31 @@
             const pickup = document.getElementById('pickupLocation').value;
             const dropoff = document.getElementById('dropoffLocation').value;
 
-            // Hide the form to display the fare calculation
-            document.getElementById('bookingForm').style.display = 'none';
-
             calculateRoute(pickup, dropoff, function(distance) {
                 const fare = (distance / 1609.34 * 2.5).toFixed(2); // Convert meters to miles and calculate fare
                 document.getElementById('fareDisplay').textContent = `Your fare is $${fare} based on ${distance / 1609.34.toFixed(2)} miles.`;
                 document.getElementsByClassName('button-group')[0].style.display = 'flex'; // Show buttons
-
-                pickupMarker.setPosition(new google.maps.LatLng(response.routes[0].legs[0].start_location.lat(), response.routes[0].legs[0].start_location.lng()));
-                dropoffMarker.setPosition(new google.maps.LatLng(response.routes[0].legs[0].end_location.lat(), response.routes[0].legs[0].end_location.lng()));
-            });
-        });
-
-        function calculateRoute(pickup, dropoff, callback) {
-            const directionsService = new google.maps.DirectionsService();
-            const directionsRenderer = new google.maps.DirectionsRenderer({
-                map: map,
-                suppressMarkers: true
             });
 
-            const request = {
-                origin: pickup,
-                destination: dropoff,
-                travelMode: google.maps.TravelMode.DRIVING
-            };
-
-            directionsService.route(request, function(response, status) {
-                if (status === google.maps.DirectionsStatus.OK) {
-                    directionsRenderer.setDirections(response);
-                    const distance = response.routes[0].legs[0].distance.value;
-                    callback(distance);
+            // Move markers based on input locations
+            var geocoder = new google.maps.Geocoder();
+            geocoder.geocode({ 'address': pickup }, function(results, status) {
+                if (status == 'OK') {
+                    map.setCenter(results[0].geometry.location);
+                    pickupMarker.setPosition(results[0].geometry.location);
                 } else {
-                    console.error("Directions request failed due to", status);
+                    alert('Geocode was not successful for the following reason: ' + status);
                 }
             });
-        }
+
+            geocoder.geocode({ 'address': dropoff }, function(results, status) {
+                if (status == 'OK') {
+                    dropoffMarker.setPosition(results[0].geometry.location);
+                } else {
+                    alert('Geocode was not successful for the following reason: ' + status);
+                }
+            });
+        });
 
         document.getElementById('cancelButton').addEventListener('click', function() {
             window.location.reload(); // Reload the page to reset the form
@@ -185,10 +180,9 @@
 
         document.getElementById('confirmButton').addEventListener('click', function() {
             alert('Your ride has been confirmed. You will receive a confirmation from the driver soon.');
-            // Here you would also send the confirmation to the driver via Telegram or other means
-            // Implementing the sending message function here
+            // Send confirmation to the driver via Telegram or other means
+            const confirmationMessage = `Ride confirmed for ${name} with fare $${fare}. Phone: ${phone}`;
             const chatId = 104897472; // Your chat ID
-            const confirmationMessage = `Ride confirmed for ${name} with fare $${fare}.`;
             const url = `https://api.telegram.org/bot7352298732:AAHl1I3HKUch12qrb3EvC7e8wOBG0JHnTDI/sendMessage?chat_id=${chatId}&text=${encodeURIComponent(confirmationMessage)}`;
             fetch(url)
                 .then(response => response.json())
@@ -202,7 +196,7 @@
                 .catch(error => {
                     console.error("Error:", error);
                 });
-            window.location.reload(); // Reload the page to reset the form
+            window.location.reload(); // Refresh the page
         });
 
         window.onload = initMap;
