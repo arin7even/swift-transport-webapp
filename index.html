@@ -76,7 +76,7 @@
             fetch(url)
                 .then(response => {
                     if (response.ok) {
-                        alert('Your booking is confirmed and sent to Telegram!');
+                        alert("You are all set! You'll receive a confirmation from the driver soon.");
                         document.getElementById('bookingForm').reset(); // Reset the form after submission
                     } else {
                         alert('Error booking ride.');
