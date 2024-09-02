@@ -70,7 +70,7 @@
         }
 
         document.getElementById('bookingForm').addEventListener('submit', function(event) {
-            event.preventDefault();
+            event.preventDefault(); // Prevent the form from refreshing the page
             const time = document.getElementById('pickupTime').value;
             const date = document.getElementById('pickupDate').value;
             const pickup = document.getElementById('pickupLocation').value;
@@ -115,6 +115,10 @@
 
         function addMarkers(pickup, dropoff) {
             const geocoder = new google.maps.Geocoder();
+
+            // Clear existing markers
+            clearMarkers();
+
             geocoder.geocode({ address: pickup }, (results, status) => {
                 if (status === 'OK') {
                     new google.maps.Marker({
@@ -130,6 +134,7 @@
                             strokeColor: "white"
                         }
                     });
+                    map.setCenter(results[0].geometry.location); // Center the map on pickup location
                 }
             });
             geocoder.geocode({ address: dropoff }, (results, status) => {
@@ -151,8 +156,17 @@
             });
         }
 
+        function clearMarkers() {
+            // Clear existing markers from the map
+            const allMarkers = map.getMarkers();
+            for (let i = 0; i < allMarkers.length; i++) {
+                allMarkers[i].setMap(null);
+            }
+        }
+
         // Call the initMap function to display the map
         window.onload = initMap;
     </script>
 </body>
 </html>
+
