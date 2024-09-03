@@ -108,6 +108,7 @@
             display: flex;
             justify-content: center;
             margin-bottom: 20px;
+            visibility: hidden; /* Hidden by default, shown after confirming info */
         }
         .tip-options button {
             margin: 0 5px;
@@ -223,16 +224,16 @@
                         fareDescription += " Rate: $5.00 per mile.";
                     } else if (distance <= 5) {
                         fare = distance * 4.8 + (travelTime > 10 ? (travelTime - 10) * 0.2 : 0);
-                        fareDescription = "Rate: $4.80 per mile, $0.20 per minute after 10 minutes.";
+                        fareDescription = `Rate: $4.80 per mile and $0.20 per minute after 10 minutes.`;
                     } else if (distance <= 10) {
-                        fare = distance * 3 + (travelTime > 10 ? (travelTime - 10) * 0.2 : 0);
-                        fareDescription = "Rate: $3.00 per mile, $0.20 per minute after 10 minutes.";
+                        fare = 10 + (distance - 2) * 3 + (travelTime > 10 ? (travelTime - 10) * 0.2 : 0);
+                        fareDescription = "Rate: $3.00 per mile after the first 2 miles and $0.20 per minute after 10 minutes.";
                     } else if (distance <= 20) {
-                        fare = distance * 2.3 + (travelTime > 10 ? (travelTime - 10) * 0.2 : 0);
-                        fareDescription = "Rate: $2.30 per mile, $0.20 per minute after 10 minutes.";
+                        fare = 10 + (distance - 2) * 2.3 + (travelTime > 10 ? (travelTime - 10) * 0.2 : 0);
+                        fareDescription = "Rate: $2.30 per mile after the first 2 miles and $0.20 per minute after 10 minutes.";
                     } else {
-                        fare = distance * 2.2 + (travelTime > 10 ? (travelTime - 10) * 0.18 : 0);
-                        fareDescription = "Rate: $2.20 per mile, $0.18 per minute after 10 minutes.";
+                        fare = 10 + (distance - 2) * 2.2 + (travelTime > 10 ? (travelTime - 10) * 0.18 : 0);
+                        fareDescription = "Rate: $2.20 per mile after the first 2 miles and $0.18 per minute after 10 minutes.";
                     }
 
                     totalFare = fare;
@@ -241,6 +242,7 @@
                     document.getElementById('etaDisplay').innerText = `Estimated Time of Arrival: ${response.routes[0].legs[0].duration_in_traffic.text} (Distance: ${distance.toFixed(2)} miles)`;
                     directionsRenderer.setDirections(response);
 
+                    document.getElementById('tipOptions').style.visibility = 'visible'; // Show tip options
                     document.getElementById('confirmRideBtn').disabled = false;
                     document.getElementById('cancelBtn').disabled = false;
                     document.getElementById('confirmRideBtn').classList.remove('blinking');
