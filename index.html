@@ -126,8 +126,14 @@
             cursor: pointer;
             transition: background-color 0.3s;
         }
+        .tip-options button:hover {
+            background-color: #0056b3; /* Darker blue on hover */
+        }
         .tip-options button.clicked {
-            background-color: #6c757d; /* Grey for clicked button */
+            background-color: grey; /* Grey for clicked button */
+        }
+        .tip-options button.disabled {
+            background-color: #6c757d; /* Grey for disabled buttons */
             cursor: not-allowed;
         }
         small {
@@ -252,35 +258,30 @@
                     const travelTime = response.routes[0].legs[0].duration.value / 60; // Convert seconds to minutes
 
                     let fare = baseFare;
-                    let fareDescription = "Base fare: $10 for up to 2 miles or 10 minutes.";
+                    let fareDescription = "<strong style='color: green;'>Base fare: $10.</strong> Covers the first 2 miles and 10 minutes.<br>";
 
                     if (distance <= 2) {
                         fare = 10.00; // $10 flat rate for up to 2 miles
-                        fareDescription += " Rate: $5.00 per mile.";
+                        fareDescription += "<strong style='color: green;'>Rate: $5.00 per mile.</strong>";
                     } else if (distance <= 5) {
-                        fare = 10 + (distance - 2) * 2.5 + (travelTime > 10 ? (travelTime - 10) * 0.2 : 0);
-                        fareDescription = `Rate: $2.50 per mile after the base fare (10$ for the first 2 miles and first 10 minutes).`;
+                        fare = 10 + (distance - 2) * 2.50 + (travelTime > 10 ? (travelTime - 10) * 0.20 : 0);
+                        fareDescription += `<strong style='color: green;'>Additional Miles:</strong><br>Distance beyond 2 miles: ${distance.toFixed(2)} - 2 = ${(distance - 2).toFixed(2)} miles.<br>Additional miles cost: ${(distance - 2).toFixed(2)} miles x $2.50 per mile = <strong style='color: green;'>$${((distance - 2) * 2.50).toFixed(2)}</strong>.<br>`;
                     } else if (distance <= 10) {
-                        fare = 10 + (distance - 2) * 2.2 + (travelTime > 10 ? (travelTime - 10) * 0.2 : 0);
-                        fareDescription = `Rate: $2.20 per mile after the base fare (10$ for the first 2 miles and first 10 minutes).`;
-                    } else {
-                        fare = 10 + (distance - 2) * 2 + (travelTime > 10 ? (travelTime - 10) * 0.2 : 0);
-                        fareDescription = `Rate: $2.00 per mile after the base fare (10$ for the first 2 miles and first 10 minutes).`;
+                        fare = 10 + (distance - 2) * 2.20 + (travelTime > 10 ? (travelTime - 10) * 0.20 : 0);
+                        fareDescription += `<strong style='color: green;'>Additional Miles:</strong><br>Distance beyond 2 miles: ${distance.toFixed(2)} - 2 = ${(distance - 2).toFixed(2)} miles.<br>Additional miles cost: ${(distance - 2).toFixed(2)} miles x $2.20 per mile = <strong style='color: green;'>$${((distance - 2) * 2.20).toFixed(2)}</strong>.<br>`;
+                    } else if (distance > 10) {
+                        fare = 10 + (distance - 2) * 2.00 + (travelTime > 10 ? (travelTime - 10) * 0.20 : 0);
+                        fareDescription += `<strong style='color: green;'>Additional Miles:</strong><br>Distance beyond 2 miles: ${distance.toFixed(2)} - 2 = ${(distance - 2).toFixed(2)} miles.<br>Additional miles cost: ${(distance - 2).toFixed(2)} miles x $2.00 per mile = <strong style='color: green;'>$${((distance - 2) * 2.00).toFixed(2)}</strong>.<br>`;
                     }
 
+                    if (travelTime > 10) {
+                        fareDescription += `<strong style='color: green;'>Additional Time:</strong><br>Time beyond 10 minutes: ${travelTime.toFixed(2)} - 10 = ${(travelTime - 10).toFixed(2)} minutes.<br>Additional time cost: ${(travelTime - 10).toFixed(2)} minutes x $0.20 per minute = <strong style='color: green;'>$${((travelTime - 10) * 0.20).toFixed(2)}</strong>.<br>`;
+                    }
+
+                    fareDescription += `<strong style='color: green;'>Total Fare:</strong><br>Base fare: $10.<br>Additional miles cost: $${((distance - 2) * (distance > 2 ? (distance <= 5 ? 2.50 : (distance <= 10 ? 2.20 : 2.00)) : 0)).toFixed(2)}.<br>Additional time cost: $${(travelTime > 10 ? ((travelTime - 10) * 0.20).toFixed(2) : 0)}.<br><strong style='color: green;'>Total Fare: $${fare.toFixed(2)}</strong>.`;
+
                     totalFare = fare;
-                    document.getElementById('fareDisplay').innerText = `Total Fare: $${fare.toFixed(2)}`;
-                    document.getElementById('fareDescription').innerHTML = `
-                        <strong>Base fare:</strong> $10. <span style="color:green;">(Covers the first 2 miles and 10 minutes.)</span><br>
-                        <strong>Additional Miles:</strong><br>
-                        Distance beyond 2 miles: ${distance.toFixed(2)} - 2 = ${(distance - 2).toFixed(2)} miles<br>
-                        Additional miles cost: ${(distance - 2).toFixed(2)} miles x $${((fare - baseFare) / (distance - 2)).toFixed(2)} per mile = $${((distance - 2) * ((fare - baseFare) / (distance - 2))).toFixed(2)}.<br>
-                        <strong>Additional Time:</strong><br>
-                        Time beyond 10 minutes: ${travelTime.toFixed(2)} - 10 = ${(travelTime - 10).toFixed(2)} minutes.<br>
-                        Additional time cost: ${(travelTime - 10).toFixed(2)} minutes x $0.20 per minute = $${((travelTime - 10) * 0.2).toFixed(2)}.<br>
-                        <strong>Total Fare:</strong> Base fare: $10. <br>Additional miles cost: $${((distance - 2) * ((fare - baseFare) / (distance - 2))).toFixed(2)}.<br>Additional time cost: $${((travelTime - 10) * 0.2).toFixed(2)}.<br>
-                        <strong>Total Fare:</strong> $${fare.toFixed(2)}.
-                    `;
+                    document.getElementById('fareDisplay').innerHTML = fareDescription;
                     document.getElementById('etaDisplay').innerText = `Estimated Time of Arrival: ${response.routes[0].legs[0].duration_in_traffic.text} (Distance: ${distance.toFixed(2)} miles)`;
                     directionsRenderer.setDirections(response);
 
@@ -325,9 +326,9 @@
             document.getElementById('tip10').disabled = true;
             document.getElementById('tip15').disabled = true;
             document.getElementById('tip20').disabled = true;
-            document.getElementById('tip10').classList.add('clicked');
-            document.getElementById('tip15').classList.add('clicked');
-            document.getElementById('tip20').classList.add('clicked');
+            document.getElementById('tip10').classList.add('disabled');
+            document.getElementById('tip15').classList.add('disabled');
+            document.getElementById('tip20').classList.add('disabled');
         }
 
         document.getElementById('confirmRideBtn').addEventListener('click', function() {
