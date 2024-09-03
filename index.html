@@ -308,13 +308,15 @@
                     }
 
                     if (travelTime > 10) {
+                        const additionalTimeCost = (travelTime - 10) * 0.15;
+                        fare += additionalTimeCost;
                         fareBreakdown += `
                             <div class="fare-step">
                                 <strong class="fare-title">Additional Time:</strong>
                                 Time beyond 10 minutes: ${travelTime.toFixed(2)} - 10 = ${(travelTime - 10).toFixed(2)} minutes
                             </div>
                             <div class="fare-step">
-                                Additional time cost: ${(travelTime - 10).toFixed(2)} minutes x $0.15 per minute = $${((travelTime - 10) * 0.15).toFixed(2)}
+                                Additional time cost: ${(travelTime - 10).toFixed(2)} minutes x $0.15 per minute = $${additionalTimeCost.toFixed(2)}
                             </div>`;
                     }
 
@@ -357,29 +359,32 @@
 
         document.getElementById('tip10').addEventListener('click', function() {
             totalFare = totalFare * 1.10;
-            document.getElementById('fareDisplay').innerText = `Total Fare with Tip: $${totalFare.toFixed(2)} (10%)`;
+            document.getElementById('fareDisplay').innerText = `Total Fare with Tip: $${totalFare.toFixed(2)}`;
             disableTipButtons();
+            this.classList.add('clicked');
         });
 
         document.getElementById('tip15').addEventListener('click', function() {
             totalFare = totalFare * 1.15;
-            document.getElementById('fareDisplay').innerText = `Total Fare with Tip: $${totalFare.toFixed(2)} (15%)`;
+            document.getElementById('fareDisplay').innerText = `Total Fare with Tip: $${totalFare.toFixed(2)}`;
             disableTipButtons();
+            this.classList.add('clicked');
         });
 
         document.getElementById('tip20').addEventListener('click', function() {
             totalFare = totalFare * 1.20;
-            document.getElementById('fareDisplay').innerText = `Total Fare with Tip: $${totalFare.toFixed(2)} (20%)`;
+            document.getElementById('fareDisplay').innerText = `Total Fare with Tip: $${totalFare.toFixed(2)}`;
             disableTipButtons();
+            this.classList.add('clicked');
         });
 
         function disableTipButtons() {
             document.getElementById('tip10').disabled = true;
             document.getElementById('tip15').disabled = true;
             document.getElementById('tip20').disabled = true;
-            document.getElementById('tip10').classList.add('disabled');
-            document.getElementById('tip15').classList.add('disabled');
-            document.getElementById('tip20').classList.add('disabled');
+            document.getElementById('tip10').classList.add('clicked');
+            document.getElementById('tip15').classList.add('clicked');
+            document.getElementById('tip20').classList.add('clicked');
         }
 
         document.getElementById('confirmRideBtn').addEventListener('click', function() {
@@ -399,7 +404,16 @@
             const pickupLink = `https://www.google.com/maps/search/?api=1&query=${pickupCoords.lat()},${pickupCoords.lng()}`;
             const dropoffLink = `https://www.google.com/maps/search/?api=1&query=${dropoffCoords.lat()},${dropoffCoords.lng()}`;
 
-            const message = `New ride booking from ${name}:\nPhone: ${phone}\nTime: ${time}\nDate: ${date}\nPickup: ${pickup}\nDrop-off: ${dropoff}\nPickup in: ${hoursUntilPickup} hours and ${minutesUntilPickup} minutes\n${fare}\nView Pickup Location: ${pickupLink}\nView Drop-off Location: ${dropoffLink}`;
+            let tipPercentage = "";
+            if (document.getElementById('tip10').classList.contains('clicked')) {
+                tipPercentage = "10%";
+            } else if (document.getElementById('tip15').classList.contains('clicked')) {
+                tipPercentage = "15%";
+            } else if (document.getElementById('tip20').classList.contains('clicked')) {
+                tipPercentage = "20%";
+            }
+
+            const message = `New ride booking from ${name}:\nPhone: ${phone}\nTime: ${time}\nDate: ${date}\nPickup: ${pickup}\nDrop-off: ${dropoff}\nPickup in: ${hoursUntilPickup} hours and ${minutesUntilPickup} minutes\n${fare}\nTip: ${tipPercentage}\nView Pickup Location: ${pickupLink}\nView Drop-off Location: ${dropoffLink}`;
             console.log("Sending message:", message); // Debugging log
 
             const chatId = 104897472; // Your chat ID
