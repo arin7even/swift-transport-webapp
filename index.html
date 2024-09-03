@@ -357,7 +357,6 @@
                 .then(response => {
                     if (response.ok) {
                         alert("Your ride has been confirmed. You will receive a confirmation from the driver soon.");
-                        window.location.reload(); // Refresh the page
                     } else {
                         console.error("Error sending message:", response.status, response.statusText);
                         alert("Error confirming ride.");
