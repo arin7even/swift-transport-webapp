@@ -141,7 +141,7 @@
             font-size: 0.9em;
         }
     </style>
-    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBsqYdVFXJcuUpxwkIEPJxEAGN2jlf-tT4"></script>
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBsqYdVFXJcuUpxwkIEPJxEAGN2jlf-tT4&libraries=places"></script>
 </head>
 <body>
     <h1>Book Your Ride</h1>
@@ -209,6 +209,14 @@
                 map: map,
                 suppressMarkers: true // Don't show default markers
             });
+
+            // Initialize Autocomplete
+            const pickupInput = document.getElementById('pickupLocation');
+            const dropoffInput = document.getElementById('dropoffLocation');
+            const pickupAutocomplete = new google.maps.places.Autocomplete(pickupInput);
+            const dropoffAutocomplete = new google.maps.places.Autocomplete(dropoffInput);
+            pickupAutocomplete.bindTo('bounds', map);
+            dropoffAutocomplete.bindTo('bounds', map);
         }
 
         document.getElementById('confirmInfoBtn').addEventListener('click', function(event) {
