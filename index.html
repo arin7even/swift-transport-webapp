@@ -234,17 +234,18 @@
             const dropoff = document.getElementById('dropoffLocation').value;
 
             const directionsService = new google.maps.DirectionsService();
+            const departureTime = new Date(`${document.getElementById('pickupDate').value}T${document.getElementById('pickupTime').value}`);
             directionsService.route({
                 origin: pickup,
                 destination: dropoff,
                 travelMode: google.maps.TravelMode.DRIVING,
                 drivingOptions: {
-                    departureTime: new Date(), // Current time for real-time traffic
+                    departureTime: departureTime, // Use the user-provided time for real-time traffic
                 }
             }, function(response, status) {
                 if (status === google.maps.DirectionsStatus.OK) {
                     const distance = response.routes[0].legs[0].distance.value / 1609.34; // Convert meters to miles
-                    const travelTime = response.routes[0].legs[0].duration.value / 60; // Convert seconds to minutes
+                    const travelTime = response.routes[0].legs[0].duration_in_traffic.value / 60; // Convert seconds to minutes
 
                     let fare = baseFare;
                     let fareBreakdown = "";
