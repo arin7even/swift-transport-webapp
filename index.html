@@ -326,10 +326,7 @@
                             Base fare: $10.00
                         </div>
                         <div class="fare-step">
-                            Additional miles cost: $${(fare - 10).toFixed(2)}
-                        </div>
-                        <div class="fare-step">
-                            Additional time cost: $${(travelTime > 10 ? (travelTime - 10) * 0.15 : 0).toFixed(2)}
+                            Additional miles/minutes cost: $${(fare - 10).toFixed(2)}
                         </div>
                         <div class="fare-step">
                             <strong>Total Fare: $${fare.toFixed(2)}</strong>
