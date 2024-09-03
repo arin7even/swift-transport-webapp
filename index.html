@@ -176,7 +176,7 @@
         let dropoffMarker;
         let directionsRenderer;
         let baseFare = 10.00;
-        let totalFare = baseFare;
+        let totalFare = 0;
         let pickupCoords = null;
         let dropoffCoords = null;
 
@@ -247,165 +247,94 @@
                     const distance = response.routes[0].legs[0].distance.value / 1609.34; // Convert meters to miles
                     const travelTime = response.routes[0].legs[0].duration_in_traffic.value / 60; // Convert seconds to minutes
 
+                    let fare = baseFare;
                     let fareBreakdown = "";
 
                     if (distance <= 2) {
-                        totalFare = baseFare; // $10 flat rate for up to 2 miles
+                        fare = 10.00; // $10 flat rate for up to 2 miles
                         fareBreakdown = `
                             <div class="fare-step">
                                 <strong class="fare-title">Base Fare: $10.00</strong>
                                 Covers the first 2 miles and 10 minutes.
                             </div>`;
                     } else if (distance <= 7) {
-                        let additionalMiles = distance - 2;
-                        let additionalCost = additionalMiles * 2.40;
-                        totalFare += additionalCost;
+                        fare = 10 + (distance - 2) * 2.4 + (travelTime > 10 ? (travelTime - 10) * 0.15 : 0);
                         fareBreakdown = `
                             <div class="fare-step">
-                                <strong class="fare-title">$2.40 per mile for 2 to 7 miles</strong>
+                                <strong class="fare-title">$2.40 per mile after the base fare (10$ for the first 2 miles and first 10 minutes)</strong>
                             </div>
                             <div class="fare-step">
-                                Distance beyond 2 miles: ${additionalMiles.toFixed(2)} miles
+                                Distance beyond 2 miles: ${distance.toFixed(2)} - 2 = ${(distance - 2).toFixed(2)} miles
                             </div>
                             <div class="fare-step">
-                                Additional miles cost: $${additionalCost.toFixed(2)}
+                                Additional miles cost: ${(distance - 2).toFixed(2)} miles x $2.40 per mile = $${((distance - 2) * 2.4).toFixed(2)}
                             </div>`;
                     } else if (distance <= 12) {
-                        let additionalMiles = distance - 7;
-                        let costForFirstSegment = 5 * 2.40;
-                        let additionalCost = additionalMiles * 2.15;
-                        totalFare += costForFirstSegment + additionalCost;
+                        fare = 10 + (distance - 2) * 2.15 + (travelTime > 10 ? (travelTime - 10) * 0.15 : 0);
                         fareBreakdown = `
                             <div class="fare-step">
-                                <strong class="fare-title">$2.40 per mile for 2 to 7 miles</strong>
+                                <strong class="fare-title">$2.15 per mile after the base fare (10$ for the first 2 miles and first 10 minutes)</strong>
                             </div>
                             <div class="fare-step">
-                                Distance: 5 miles (2 to 7 miles)
+                                Distance beyond 2 miles: ${distance.toFixed(2)} - 2 = ${(distance - 2).toFixed(2)} miles
                             </div>
                             <div class="fare-step">
-                                Cost for first segment: $${costForFirstSegment.toFixed(2)}
-                            </div>
-                            <div class="fare-step">
-                                <strong class="fare-title">$2.15 per mile for 7 to 12 miles</strong>
-                            </div>
-                            <div class="fare-step">
-                                Distance beyond 7 miles: ${additionalMiles.toFixed(2)} miles
-                            </div>
-                            <div class="fare-step">
-                                Additional miles cost: $${additionalCost.toFixed(2)}
+                                Additional miles cost: ${(distance - 2).toFixed(2)} miles x $2.15 per mile = $${((distance - 2) * 2.15).toFixed(2)}
                             </div>`;
                     } else if (distance <= 18) {
-                        let additionalMiles = distance - 12;
-                        let costForFirstSegment = 5 * 2.40;
-                        let costForSecondSegment = 5 * 2.15;
-                        let additionalCost = additionalMiles * 1.85;
-                        totalFare += costForFirstSegment + costForSecondSegment + additionalCost;
+                        fare = 10 + (distance - 2) * 1.85 + (travelTime > 10 ? (travelTime - 10) * 0.15 : 0);
                         fareBreakdown = `
                             <div class="fare-step">
-                                <strong class="fare-title">$2.40 per mile for 2 to 7 miles</strong>
+                                <strong class="fare-title">$1.85 per mile after the base fare (10$ for the first 2 miles and first 10 minutes)</strong>
                             </div>
                             <div class="fare-step">
-                                Distance: 5 miles (2 to 7 miles)
+                                Distance beyond 2 miles: ${distance.toFixed(2)} - 2 = ${(distance - 2).toFixed(2)} miles
                             </div>
                             <div class="fare-step">
-                                Cost for first segment: $${costForFirstSegment.toFixed(2)}
-                            </div>
-                            <div class="fare-step">
-                                <strong class="fare-title">$2.15 per mile for 7 to 12 miles</strong>
-                            </div>
-                            <div class="fare-step">
-                                Distance: 5 miles (7 to 12 miles)
-                            </div>
-                            <div class="fare-step">
-                                Cost for second segment: $${costForSecondSegment.toFixed(2)}
-                            </div>
-                            <div class="fare-step">
-                                <strong class="fare-title">$1.85 per mile for 12 to 18 miles</strong>
-                            </div>
-                            <div class="fare-step">
-                                Distance beyond 12 miles: ${additionalMiles.toFixed(2)} miles
-                            </div>
-                            <div class="fare-step">
-                                Additional miles cost: $${additionalCost.toFixed(2)}
+                                Additional miles cost: ${(distance - 2).toFixed(2)} miles x $1.85 per mile = $${((distance - 2) * 1.85).toFixed(2)}
                             </div>`;
                     } else {
-                        let additionalMiles = distance - 18;
-                        let costForFirstSegment = 5 * 2.40;
-                        let costForSecondSegment = 5 * 2.15;
-                        let costForThirdSegment = 6 * 1.85;
-                        let additionalCost = additionalMiles * 1.75;
-                        totalFare += costForFirstSegment + costForSecondSegment + costForThirdSegment + additionalCost;
+                        fare = 10 + (distance - 2) * 1.75 + (travelTime > 10 ? (travelTime - 10) * 0.15 : 0);
                         fareBreakdown = `
                             <div class="fare-step">
-                                <strong class="fare-title">$2.40 per mile for 2 to 7 miles</strong>
+                                <strong class="fare-title">$1.75 per mile after the base fare (10$ for the first 2 miles and first 10 minutes)</strong>
                             </div>
                             <div class="fare-step">
-                                Distance: 5 miles (2 to 7 miles)
+                                Distance beyond 2 miles: ${distance.toFixed(2)} - 2 = ${(distance - 2).toFixed(2)} miles
                             </div>
                             <div class="fare-step">
-                                Cost for first segment: $${costForFirstSegment.toFixed(2)}
-                            </div>
-                            <div class="fare-step">
-                                <strong class="fare-title">$2.15 per mile for 7 to 12 miles</strong>
-                            </div>
-                            <div class="fare-step">
-                                Distance: 5 miles (7 to 12 miles)
-                            </div>
-                            <div class="fare-step">
-                                Cost for second segment: $${costForSecondSegment.toFixed(2)}
-                            </div>
-                            <div class="fare-step">
-                                <strong class="fare-title">$1.85 per mile for 12 to 18 miles</strong>
-                            </div>
-                            <div class="fare-step">
-                                Distance: 6 miles (12 to 18 miles)
-                            </div>
-                            <div class="fare-step">
-                                Cost for third segment: $${costForThirdSegment.toFixed(2)}
-                            </div>
-                            <div class="fare-step">
-                                <strong class="fare-title">$1.75 per mile for over 18 miles</strong>
-                            </div>
-                            <div class="fare-step">
-                                Distance beyond 18 miles: ${additionalMiles.toFixed(2)} miles
-                            </div>
-                            <div class="fare-step">
-                                Additional miles cost: $${additionalCost.toFixed(2)}
+                                Additional miles cost: ${(distance - 2).toFixed(2)} miles x $1.75 per mile = $${((distance - 2) * 1.75).toFixed(2)}
                             </div>`;
                     }
 
-                    // Additional Time Calculation
                     if (travelTime > 10) {
-                        let additionalMinutes = travelTime - 10;
-                        let timeCost = additionalMinutes * 0.15;
-                        totalFare += timeCost;
                         fareBreakdown += `
                             <div class="fare-step">
                                 <strong class="fare-title">Additional Time:</strong>
-                                Time beyond 10 minutes: ${additionalMinutes.toFixed(2)} minutes
+                                Time beyond 10 minutes: ${travelTime.toFixed(2)} - 10 = ${(travelTime - 10).toFixed(2)} minutes
                             </div>
                             <div class="fare-step">
-                                Additional time cost: $${timeCost.toFixed(2)}
+                                Additional time cost: ${(travelTime - 10).toFixed(2)} minutes x $0.15 per minute = $${((travelTime - 10) * 0.15).toFixed(2)}
                             </div>`;
                     }
 
-                    // Final Fare Display
                     fareBreakdown += `
                         <div class="fare-step">
                             <strong class="fare-title">Total Fare:</strong>
                             Base fare: $10.00
                         </div>
                         <div class="fare-step">
-                            Additional miles cost: $${(totalFare - baseFare).toFixed(2)}
+                            Additional miles cost: $${(fare - 10).toFixed(2)}
                         </div>
                         <div class="fare-step">
-                            Additional time cost: $${(travelTime > 10 ? (totalFare - baseFare - additionalCost) : 0).toFixed(2)}
+                            Additional time cost: $${(travelTime > 10 ? (travelTime - 10) * 0.15 : 0).toFixed(2)}
                         </div>
                         <div class="fare-step">
-                            <strong>Total Fare: $${totalFare.toFixed(2)}</strong>
+                            <strong>Total Fare: $${fare.toFixed(2)}</strong>
                         </div>`;
 
-                    document.getElementById('fareDisplay').innerText = `Total Fare: $${totalFare.toFixed(2)}`;
+                    totalFare = fare;
+                    document.getElementById('fareDisplay').innerText = `Total Fare: $${fare.toFixed(2)}`;
                     document.getElementById('fareBreakdown').innerHTML = fareBreakdown;
                     document.getElementById('etaDisplay').innerText = `Estimated Time of Arrival: ${response.routes[0].legs[0].duration_in_traffic.text} (Distance: ${distance.toFixed(2)} miles)`;
                     directionsRenderer.setDirections(response);
@@ -428,39 +357,32 @@
 
         document.getElementById('tip10').addEventListener('click', function() {
             totalFare = totalFare * 1.10;
-            document.getElementById('fareDisplay').innerText = `Total Fare with Tip: $${totalFare.toFixed(2)}`;
+            document.getElementById('fareDisplay').innerText = `Total Fare with Tip: $${totalFare.toFixed(2)} (10%)`;
             disableTipButtons();
-            this.classList.add('clicked');
-            updateMessageWithTip(10); // Notify driver of tip percentage
         });
 
         document.getElementById('tip15').addEventListener('click', function() {
             totalFare = totalFare * 1.15;
-            document.getElementById('fareDisplay').innerText = `Total Fare with Tip: $${totalFare.toFixed(2)}`;
+            document.getElementById('fareDisplay').innerText = `Total Fare with Tip: $${totalFare.toFixed(2)} (15%)`;
             disableTipButtons();
-            this.classList.add('clicked');
-            updateMessageWithTip(15); // Notify driver of tip percentage
         });
 
         document.getElementById('tip20').addEventListener('click', function() {
             totalFare = totalFare * 1.20;
-            document.getElementById('fareDisplay').innerText = `Total Fare with Tip: $${totalFare.toFixed(2)}`;
+            document.getElementById('fareDisplay').innerText = `Total Fare with Tip: $${totalFare.toFixed(2)} (20%)`;
             disableTipButtons();
-            this.classList.add('clicked');
-            updateMessageWithTip(20); // Notify driver of tip percentage
         });
 
         function disableTipButtons() {
             document.getElementById('tip10').disabled = true;
             document.getElementById('tip15').disabled = true;
             document.getElementById('tip20').disabled = true;
-            document.getElementById('tip10').classList.add('clicked');
-            document.getElementById('tip15').classList.add('clicked');
-            document.getElementById('tip20').classList.add('clicked');
+            document.getElementById('tip10').classList.add('disabled');
+            document.getElementById('tip15').classList.add('disabled');
+            document.getElementById('tip20').classList.add('disabled');
         }
 
-        function updateMessageWithTip(tipPercentage) {
-            // Update the message that will be sent to the driver to include the tip percentage
+        document.getElementById('confirmRideBtn').addEventListener('click', function() {
             const name = document.getElementById('name').value;
             const phone = document.getElementById('phone').value;
             const time = document.getElementById('pickupTime').value;
@@ -477,7 +399,7 @@
             const pickupLink = `https://www.google.com/maps/search/?api=1&query=${pickupCoords.lat()},${pickupCoords.lng()}`;
             const dropoffLink = `https://www.google.com/maps/search/?api=1&query=${dropoffCoords.lat()},${dropoffCoords.lng()}`;
 
-            const message = `New ride booking from ${name}:\nPhone: ${phone}\nTime: ${time}\nDate: ${date}\nPickup: ${pickup}\nDrop-off: ${dropoff}\nPickup in: ${hoursUntilPickup} hours and ${minutesUntilPickup} minutes\n${fare}\nTip: ${tipPercentage}%\nView Pickup Location: ${pickupLink}\nView Drop-off Location: ${dropoffLink}`;
+            const message = `New ride booking from ${name}:\nPhone: ${phone}\nTime: ${time}\nDate: ${date}\nPickup: ${pickup}\nDrop-off: ${dropoff}\nPickup in: ${hoursUntilPickup} hours and ${minutesUntilPickup} minutes\n${fare}\nView Pickup Location: ${pickupLink}\nView Drop-off Location: ${dropoffLink}`;
             console.log("Sending message:", message); // Debugging log
 
             const chatId = 104897472; // Your chat ID
@@ -497,10 +419,6 @@
                     console.error("Error:", error);
                     alert("Error sending message.");
                 });
-        }
-
-        document.getElementById('confirmRideBtn').addEventListener('click', function() {
-            updateMessageWithTip(0); // Send final confirmation without tip if no tip was selected
         });
 
         document.getElementById('cancelBtn').addEventListener('click', function() {
