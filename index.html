@@ -91,19 +91,48 @@
             text-align: center;
             color: #80ff72; /* Green text for ETA display */
         }
+        .fare {
+            font-size: 18px;
+            font-weight: bold;
+            color: #80ff72; /* Green text for fare display */
+            margin: 10px 0;
+            text-align: center;
+        }
+        .fare-description {
+            color: #80ff72;
+            font-size: 14px;
+            text-align: center;
+            margin-bottom: 20px;
+        }
         .fare-container {
             border: 2px solid #007bff; /* Blue frame around fare breakdown */
             padding: 10px;
             border-radius: 8px;
             margin-top: 20px;
         }
-        .fare-title {
-            font-weight: bold;
-            color: #80ff72; /* Green text for titles */
-            margin-top: 10px;
+        .tip-options {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 20px;
+            visibility: hidden; /* Hidden by default, shown after confirming info */
         }
-        .fare-step {
-            margin-top: 5px;
+        .tip-options button {
+            margin: 0 5px;
+            padding: 10px;
+            font-size: 16px;
+            border-radius: 4px;
+            background-color: #007bff; /* Blue button */
+            color: white;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        .tip-options button.clicked {
+            background-color: #6c757d; /* Grey for clicked button */
+            cursor: not-allowed;
+        }
+        small {
+            color: #80ff72; /* Light green color for small text */
+            font-size: 0.9em;
         }
     </style>
     <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBsqYdVFXJcuUpxwkIEPJxEAGN2jlf-tT4&libraries=places"></script>
@@ -132,7 +161,7 @@
         <button type="submit" id="confirmInfoBtn" class="blinking">Confirm Info</button>
         <div id="fareContainer" class="fare-container" style="display: none;">
             <div id="fareDisplay" class="fare"></div>
-            <div id="fareBreakdown" class="fare-description"></div>
+            <div id="fareDescription" class="fare-description"></div>
             <div class="tip-options" id="tipOptions">
                 <button type="button" id="tip10">Tip 10%</button>
                 <button type="button" id="tip15">Tip 15%</button>
@@ -223,82 +252,35 @@
                     const travelTime = response.routes[0].legs[0].duration.value / 60; // Convert seconds to minutes
 
                     let fare = baseFare;
-                    let fareBreakdown = "";
+                    let fareDescription = "Base fare: $10 for up to 2 miles or 10 minutes.";
 
                     if (distance <= 2) {
                         fare = 10.00; // $10 flat rate for up to 2 miles
-                        fareBreakdown = `
-                            <div class="fare-step">
-                                <strong class="fare-title">Base Fare: $10.00</strong>
-                                Covers the first 2 miles and 10 minutes.
-                            </div>`;
-                    } else if (distance <= 7) {
+                        fareDescription += " Rate: $5.00 per mile.";
+                    } else if (distance <= 5) {
                         fare = 10 + (distance - 2) * 2.5 + (travelTime > 10 ? (travelTime - 10) * 0.2 : 0);
-                        fareBreakdown = `
-                            <div class="fare-step">
-                                <strong class="fare-title">$2.50 per mile after the base fare (10$ for the first 2 miles and first 10 minutes)</strong>
-                            </div>
-                            <div class="fare-step">
-                                Distance beyond 2 miles: ${distance.toFixed(2)} - 2 = ${(distance - 2).toFixed(2)} miles
-                            </div>
-                            <div class="fare-step">
-                                Additional miles cost: ${(distance - 2).toFixed(2)} miles x $2.50 per mile = $${((distance - 2) * 2.5).toFixed(2)}
-                            </div>`;
-                    } else if (distance <= 15) {
+                        fareDescription = `Rate: $2.50 per mile after the base fare (10$ for the first 2 miles and first 10 minutes).`;
+                    } else if (distance <= 10) {
                         fare = 10 + (distance - 2) * 2.2 + (travelTime > 10 ? (travelTime - 10) * 0.2 : 0);
-                        fareBreakdown = `
-                            <div class="fare-step">
-                                <strong class="fare-title">$2.20 per mile after the base fare (10$ for the first 2 miles and first 10 minutes)</strong>
-                            </div>
-                            <div class="fare-step">
-                                Distance beyond 2 miles: ${distance.toFixed(2)} - 2 = ${(distance - 2).toFixed(2)} miles
-                            </div>
-                            <div class="fare-step">
-                                Additional miles cost: ${(distance - 2).toFixed(2)} miles x $2.20 per mile = $${((distance - 2) * 2.2).toFixed(2)}
-                            </div>`;
+                        fareDescription = `Rate: $2.20 per mile after the base fare (10$ for the first 2 miles and first 10 minutes).`;
                     } else {
-                        fare = 10 + (distance - 2) * 2.0 + (travelTime > 10 ? (travelTime - 10) * 0.2 : 0);
-                        fareBreakdown = `
-                            <div class="fare-step">
-                                <strong class="fare-title">$2.00 per mile after the base fare (10$ for the first 2 miles and first 10 minutes)</strong>
-                            </div>
-                            <div class="fare-step">
-                                Distance beyond 2 miles: ${distance.toFixed(2)} - 2 = ${(distance - 2).toFixed(2)} miles
-                            </div>
-                            <div class="fare-step">
-                                Additional miles cost: ${(distance - 2).toFixed(2)} miles x $2.00 per mile = $${((distance - 2) * 2.0).toFixed(2)}
-                            </div>`;
+                        fare = 10 + (distance - 2) * 2 + (travelTime > 10 ? (travelTime - 10) * 0.2 : 0);
+                        fareDescription = `Rate: $2.00 per mile after the base fare (10$ for the first 2 miles and first 10 minutes).`;
                     }
-
-                    if (travelTime > 10) {
-                        fareBreakdown += `
-                            <div class="fare-step">
-                                <strong class="fare-title">Additional Time:</strong>
-                                Time beyond 10 minutes: ${travelTime.toFixed(2)} - 10 = ${(travelTime - 10).toFixed(2)} minutes
-                            </div>
-                            <div class="fare-step">
-                                Additional time cost: ${(travelTime - 10).toFixed(2)} minutes x $0.20 per minute = $${((travelTime - 10) * 0.2).toFixed(2)}
-                            </div>`;
-                    }
-
-                    fareBreakdown += `
-                        <div class="fare-step">
-                            <strong class="fare-title">Total Fare:</strong>
-                            Base fare: $10.00
-                        </div>
-                        <div class="fare-step">
-                            Additional miles cost: $${(fare - 10).toFixed(2)}
-                        </div>
-                        <div class="fare-step">
-                            Additional time cost: $${(travelTime > 10 ? (travelTime - 10) * 0.2 : 0).toFixed(2)}
-                        </div>
-                        <div class="fare-step">
-                            <strong>Total Fare: $${fare.toFixed(2)}</strong>
-                        </div>`;
 
                     totalFare = fare;
                     document.getElementById('fareDisplay').innerText = `Total Fare: $${fare.toFixed(2)}`;
-                    document.getElementById('fareBreakdown').innerHTML = fareBreakdown;
+                    document.getElementById('fareDescription').innerHTML = `
+                        <strong>Base fare:</strong> $10. <span style="color:green;">(Covers the first 2 miles and 10 minutes.)</span><br>
+                        <strong>Additional Miles:</strong><br>
+                        Distance beyond 2 miles: ${distance.toFixed(2)} - 2 = ${(distance - 2).toFixed(2)} miles<br>
+                        Additional miles cost: ${(distance - 2).toFixed(2)} miles x $${((fare - baseFare) / (distance - 2)).toFixed(2)} per mile = $${((distance - 2) * ((fare - baseFare) / (distance - 2))).toFixed(2)}.<br>
+                        <strong>Additional Time:</strong><br>
+                        Time beyond 10 minutes: ${travelTime.toFixed(2)} - 10 = ${(travelTime - 10).toFixed(2)} minutes.<br>
+                        Additional time cost: ${(travelTime - 10).toFixed(2)} minutes x $0.20 per minute = $${((travelTime - 10) * 0.2).toFixed(2)}.<br>
+                        <strong>Total Fare:</strong> Base fare: $10. <br>Additional miles cost: $${((distance - 2) * ((fare - baseFare) / (distance - 2))).toFixed(2)}.<br>Additional time cost: $${((travelTime - 10) * 0.2).toFixed(2)}.<br>
+                        <strong>Total Fare:</strong> $${fare.toFixed(2)}.
+                    `;
                     document.getElementById('etaDisplay').innerText = `Estimated Time of Arrival: ${response.routes[0].legs[0].duration_in_traffic.text} (Distance: ${distance.toFixed(2)} miles)`;
                     directionsRenderer.setDirections(response);
 
@@ -343,9 +325,9 @@
             document.getElementById('tip10').disabled = true;
             document.getElementById('tip15').disabled = true;
             document.getElementById('tip20').disabled = true;
-            document.getElementById('tip10').classList.add('disabled');
-            document.getElementById('tip15').classList.add('disabled');
-            document.getElementById('tip20').classList.add('disabled');
+            document.getElementById('tip10').classList.add('clicked');
+            document.getElementById('tip15').classList.add('clicked');
+            document.getElementById('tip20').classList.add('clicked');
         }
 
         document.getElementById('confirmRideBtn').addEventListener('click', function() {
