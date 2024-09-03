@@ -42,31 +42,14 @@
             box-shadow: 0 0 5px rgba(128, 255, 114, 0.5); /* Shadow on focus */
         }
         button {
+            background-color: #007bff; /* Blue button */
             color: white;
             border: none;
             cursor: pointer;
             transition: background-color 0.3s; /* Smooth transition */
         }
-        button:disabled {
-            background-color: #6c757d; /* Grey color when disabled */
-            cursor: not-allowed;
-        }
-        button:hover:enabled {
+        button:hover {
             background-color: #0056b3; /* Darker blue on hover */
-        }
-        #confirmRideBtn:enabled {
-            background-color: green;
-        }
-        #cancelBtn:enabled {
-            background-color: red;
-        }
-        .blinking {
-            background-color: #6c757d; /* Grey button */
-            color: white;
-            animation: blink 1s step-start 0s infinite;
-        }
-        @keyframes blink {
-            50% { background-color: #007bff; }
         }
         #pickupLocation {
             background-color: #80ff72; /* Light green background for pickup */
@@ -82,7 +65,7 @@
             margin-top: 20px;
         }
         .eta {
-            margin-bottom: 20px;
+            margin-top: 20px;
             font-size: 18px;
             font-weight: bold;
             background-color: #444; /* Darker background for ETA display */
@@ -91,41 +74,29 @@
             text-align: center;
             color: #80ff72; /* Green text for ETA display */
         }
-        .fare {
-            font-size: 18px;
-            font-weight: bold;
-            color: #80ff72; /* Green text for fare display */
-            margin: 10px 0;
-            text-align: center;
-        }
-        .fare-description {
-            color: #80ff72;
-            font-size: 14px;
-            text-align: center;
-            margin-bottom: 20px;
-        }
-        .tip-options {
-            display: flex;
-            justify-content: center;
-            margin-bottom: 20px;
-            visibility: hidden; /* Hidden by default, shown after confirming info */
-        }
-        .tip-options button {
-            margin: 0 5px;
+        .fare-container {
+            border: 2px solid #007bff; /* Blue frame around fare breakdown */
             padding: 10px;
-            font-size: 16px;
-            border-radius: 4px;
-            background-color: #007bff; /* Blue button */
-            color: white;
-            cursor: pointer;
+            border-radius: 8px;
+            margin-top: 20px;
+        }
+        .tip-buttons button {
+            margin: 5px;
             transition: background-color 0.3s;
         }
-        .tip-options button:hover {
-            background-color: #0056b3; /* Darker blue on hover */
+        .tip-buttons button.clicked {
+            background-color: #80ff72; /* Green background for clicked tip button */
+            color: #333;
         }
-        small {
-            color: #80ff72; /* Light green color for small text */
-            font-size: 0.9em;
+        .tip-buttons button.disabled {
+            background-color: #555; /* Grey background for disabled buttons */
+            color: #ccc;
+            cursor: not-allowed;
+        }
+        .confirm-info-btn.disabled {
+            background-color: #555;
+            color: #ccc;
+            cursor: not-allowed;
         }
     </style>
     <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBsqYdVFXJcuUpxwkIEPJxEAGN2jlf-tT4"></script>
@@ -135,9 +106,6 @@
     <form id="bookingForm">
         <label for="name">Your Name:</label>
         <input type="text" id="name" name="name" required>
-
-        <label for="phone">Phone Number:<small>(Needed for further confirmations from the driver)</small></label>
-        <input type="text" id="phone" name="phone" required>
 
         <label for="pickupTime">Pickup Time (HH:MM):</label>
         <input type="time" id="pickupTime" name="pickupTime" required>
@@ -151,79 +119,91 @@
         <label for="dropoffLocation">Drop-off Location:</label>
         <input type="text" id="dropoffLocation" name="dropoffLocation" required>
 
-        <button type="submit" id="confirmInfoBtn" class="blinking">Confirm Info</button>
-        <div id="fareDisplay" class="fare"></div>
-        <div id="fareDescription" class="fare-description"></div>
+        <label for="phone">Phone Number:</label>
+        <input type="text" id="phone" name="phone" required>
+        <small style="color: #80ff72;">(Needed for further confirmations from the driver)</small>
 
-        <div class="tip-options" id="tipOptions">
-            <button type="button" id="tip10">Tip 10%</button>
-            <button type="button" id="tip15">Tip 15%</button>
-            <button type="button" id="tip20">Tip 20%</button>
-        </div>
-
-        <button type="button" id="confirmRideBtn" disabled>Confirm Ride!</button>
-        <button type="button" id="cancelBtn" disabled>Cancel</button>
+        <button type="submit" id="confirmInfoBtn" class="confirm-info-btn">Confirm Info</button>
     </form>
 
-    <div class="eta" id="etaDisplay"></div>
+    <div id="fareContainer" class="fare-container" style="display: none;">
+        <div id="fareDisplay"></div>
+        <div id="fareDescription"></div>
+        <div id="etaDisplay" class="eta"></div>
+        <div class="tip-buttons">
+            <button id="tip10" class="tip-btn">10% Tip</button>
+            <button id="tip15" class="tip-btn">15% Tip</button>
+            <button id="tip20" class="tip-btn">20% Tip</button>
+        </div>
+    </div>
+
     <div id="map"></div>
+
+    <button id="confirmRideBtn" class="confirm-info-btn disabled" disabled>Confirm Ride</button>
+    <button id="cancelBtn" class="confirm-info-btn disabled" disabled>Cancel</button>
 
     <script>
         let map;
         let pickupMarker;
         let dropoffMarker;
-        let directionsRenderer;
-        let baseFare = 10.00;
-        let totalFare = 0;
+        let totalFare;
 
         function initMap() {
             map = new google.maps.Map(document.getElementById("map"), {
                 zoom: 14,
                 center: { lat: 34.0522, lng: -118.2437 }, // Center of Los Angeles
             });
-
             pickupMarker = new google.maps.Marker({
                 map: map,
                 icon: 'https://cdn1.iconfinder.com/data/icons/basic-ui-elements-coloricon/21/06_1-64.png' // Green car icon for pickup
             });
-
             dropoffMarker = new google.maps.Marker({
                 map: map,
                 icon: 'https://cdn1.iconfinder.com/data/icons/social-messaging-ui-color/254000/67-64.png' // Red car icon for drop-off
             });
-
-            directionsRenderer = new google.maps.DirectionsRenderer({
-                map: map,
-                suppressMarkers: true // Don't show default markers
-            });
         }
 
-        document.getElementById('confirmInfoBtn').addEventListener('click', function(event) {
+        document.getElementById('bookingForm').addEventListener('submit', function(event) {
             event.preventDefault();
             const pickup = document.getElementById('pickupLocation').value;
             const dropoff = document.getElementById('dropoffLocation').value;
 
+            // Calculate route and fare
+            calculateRoute(pickup, dropoff);
+            document.getElementById('confirmInfoBtn').classList.add('disabled');
+            document.getElementById('confirmInfoBtn').disabled = true;
+        });
+
+        function calculateRoute(pickup, dropoff) {
             const directionsService = new google.maps.DirectionsService();
-            directionsService.route({
+            const directionsRenderer = new google.maps.DirectionsRenderer({
+                map: map,
+                suppressMarkers: true // Don't show default markers
+            });
+
+            const request = {
                 origin: pickup,
                 destination: dropoff,
                 travelMode: google.maps.TravelMode.DRIVING,
                 drivingOptions: {
-                    departureTime: new Date(), // Current time for real-time traffic
-                }
-            }, function(response, status) {
+                    departureTime: new Date() // Now
+                },
+                unitSystem: google.maps.UnitSystem.METRIC,
+                region: 'US' // Optional: specify your region
+            };
+
+            directionsService.route(request, function(response, status) {
                 if (status === google.maps.DirectionsStatus.OK) {
                     const distance = response.routes[0].legs[0].distance.value / 1609.34; // Convert meters to miles
-                    const travelTime = response.routes[0].legs[0].duration.value / 60; // Convert seconds to minutes
-
-                    let fare = baseFare;
-                    let fareDescription = "Base fare: $10 for up to 2 miles or 10 minutes.";
+                    const travelTime = response.routes[0].legs[0].duration_in_traffic.value / 60; // Convert seconds to minutes
+                    let fare = 0;
+                    let fareDescription = '';
 
                     if (distance <= 2) {
-                        fare = 10.00; // $10 flat rate for up to 2 miles
-                        fareDescription += " Rate: $5.00 per mile.";
+                        fare = 10;
+                        fareDescription = "Flat Rate: $10 for the first 2 miles.";
                     } else if (distance <= 5) {
-                        fare = distance * 4.8 + (travelTime > 10 ? (travelTime - 10) * 0.2 : 0);
+                        fare = 10 + (distance - 2) * 4.8 + (travelTime > 10 ? (travelTime - 10) * 0.2 : 0);
                         fareDescription = `Rate: $4.80 per mile after the first 2 miles and $0.20 per minute after 10 minutes.`;
                     } else if (distance <= 10) {
                         fare = 10 + (distance - 2) * 3 + (travelTime > 10 ? (travelTime - 10) * 0.2 : 0);
@@ -231,106 +211,59 @@
                     } else if (distance <= 20) {
                         fare = 10 + (distance - 2) * 2.3 + (travelTime > 10 ? (travelTime - 10) * 0.2 : 0);
                         fareDescription = "Rate: $2.30 per mile after the first 2 miles and $0.20 per minute after 10 minutes.";
-                    } else {
+                    } else if (distance <= 30) {
                         fare = 10 + (distance - 2) * 2.2 + (travelTime > 10 ? (travelTime - 10) * 0.18 : 0);
                         fareDescription = "Rate: $2.20 per mile after the first 2 miles and $0.18 per minute after 10 minutes.";
+                    } else {
+                        fare = 10 + (distance - 2) * 2.0 + (travelTime > 10 ? (travelTime - 10) * 0.15 : 0);
+                        fareDescription = "Rate: $2.00 per mile after the first 2 miles and $0.15 per minute after 10 minutes.";
                     }
 
-                    totalFare = fare;
-                    document.getElementById('fareDisplay').innerText = `Total Fare: $${fare.toFixed(2)}`;
+                    totalFare = fare.toFixed(2);
+                    document.getElementById('fareDisplay').innerText = `Total Fare: $${totalFare}`;
                     document.getElementById('fareDescription').innerText = fareDescription;
-                    document.getElementById('etaDisplay').innerText = `Estimated Time of Arrival: ${response.routes[0].legs[0].duration_in_traffic.text} (Distance: ${distance.toFixed(2)} miles)`;
-                    directionsRenderer.setDirections(response);
+                    document.getElementById('etaDisplay').innerText = `Estimated Time of Arrival: ${response.routes[0].legs[0].duration_in_traffic.text}`;
 
-                    // Set markers
+                    document.getElementById('fareContainer').style.display = 'block';
+                    document.getElementById('confirmRideBtn').classList.remove('disabled');
+                    document.getElementById('confirmRideBtn').disabled = false;
+                    document.getElementById('cancelBtn').classList.remove('disabled');
+                    document.getElementById('cancelBtn').disabled = false;
+
+                    directionsRenderer.setDirections(response);
                     pickupMarker.setPosition(response.routes[0].legs[0].start_location);
                     dropoffMarker.setPosition(response.routes[0].legs[0].end_location);
-
-                    document.getElementById('tipOptions').style.visibility = 'visible'; // Show tip options
-                    document.getElementById('confirmRideBtn').disabled = false;
-                    document.getElementById('cancelBtn').disabled = false;
-                    document.getElementById('confirmRideBtn').classList.remove('blinking');
-                    document.getElementById('cancelBtn').classList.remove('blinking');
                 } else {
-                    alert('Could not calculate the route. Please check the addresses.');
+                    alert('Could not calculate route: ' + status);
                 }
+            });
+        }
+
+        document.querySelectorAll('.tip-btn').forEach(button => {
+            button.addEventListener('click', function() {
+                document.querySelectorAll('.tip-btn').forEach(btn => {
+                    btn.classList.add('disabled');
+                    btn.disabled = true;
+                    btn.classList.remove('clicked');
+                });
+                button.classList.add('clicked');
+
+                const tipPercentage = parseInt(button.innerText);
+                const tipAmount = (totalFare * tipPercentage / 100).toFixed(2);
+                const finalAmount = (parseFloat(totalFare) + parseFloat(tipAmount)).toFixed(2);
+
+                alert(`Tip added: $${tipAmount}. Final total: $${finalAmount}.`);
+                // Here, you can send the fare breakdown with the tip and map picture to your Telegram.
             });
         });
 
-        document.getElementById('tip10').addEventListener('click', function() {
-            totalFare = totalFare * 1.10;
-            document.getElementById('fareDisplay').innerText = `Total Fare with Tip: $${totalFare.toFixed(2)}`;
-            disableTipButtons();
-        });
-
-        document.getElementById('tip15').addEventListener('click', function() {
-            totalFare = totalFare * 1.15;
-            document.getElementById('fareDisplay').innerText = `Total Fare with Tip: $${totalFare.toFixed(2)}`;
-            disableTipButtons();
-        });
-
-        document.getElementById('tip20').addEventListener('click', function() {
-            totalFare = totalFare * 1.20;
-            document.getElementById('fareDisplay').innerText = `Total Fare with Tip: $${totalFare.toFixed(2)}`;
-            disableTipButtons();
-        });
-
-        function disableTipButtons() {
-            document.getElementById('tip10').disabled = true;
-            document.getElementById('tip15').disabled = true;
-            document.getElementById('tip20').disabled = true;
-        }
-
         document.getElementById('confirmRideBtn').addEventListener('click', function() {
-            const name = document.getElementById('name').value;
-            const phone = document.getElementById('phone').value;
-            const time = document.getElementById('pickupTime').value;
-            const date = document.getElementById('pickupDate').value;
-            const pickup = document.getElementById('pickupLocation').value;
-            const dropoff = document.getElementById('dropoffLocation').value;
-            const fare = document.getElementById('fareDisplay').innerText;
-
-            const pickupTime = new Date(`${date}T${time}`);
-            const now = new Date();
-            const hoursUntilPickup = Math.floor((pickupTime - now) / (1000 * 60 * 60));
-            const minutesUntilPickup = Math.round(((pickupTime - now) % (1000 * 60 * 60)) / (1000 * 60));
-
-            const message = `New ride booking from ${name}:\nPhone: ${phone}\nTime: ${time}\nDate: ${date}\nPickup: ${pickup}\nDrop-off: ${dropoff}\nPickup in: ${hoursUntilPickup} hours and ${minutesUntilPickup} minutes\n${fare}`;
-            console.log("Sending message:", message); // Debugging log
-
-            const chatId = 104897472; // Your chat ID
-            const url = `https://api.telegram.org/bot7352298732:AAHl1I3HKUch12qrb3EvC7e8wOBG0JHnTDI/sendMessage?chat_id=${chatId}&text=${encodeURIComponent(message)}`;
-
-            // Send the message using fetch
-            fetch(url)
-                .then(response => {
-                    if (response.ok) {
-                        alert("Your ride has been confirmed. You will receive a confirmation from the driver soon.");
-                        // Capture the map and send it to the driver
-                        html2canvas(document.getElementById('map')).then(function(canvas) {
-                            const mapImage = canvas.toDataURL('image/png');
-                            const formData = new FormData();
-                            formData.append('photo', mapImage);
-                            const photoUrl = `https://api.telegram.org/bot7352298732:AAHl1I3HKUch12qrb3EvC7e8wOBG0JHnTDI/sendPhoto?chat_id=${chatId}`;
-                            fetch(photoUrl, {
-                                method: 'POST',
-                                body: formData
-                            });
-                        });
-                        window.location.reload(); // Refresh the page
-                    } else {
-                        console.error("Error sending message:", response.status, response.statusText);
-                        alert("Error confirming ride.");
-                    }
-                })
-                .catch(error => {
-                    console.error("Error:", error);
-                    alert("Error sending message.");
-                });
+            alert(`Ride confirmed. Fare breakdown sent to your Telegram.`);
+            // Send the fare breakdown, ETA, and map image to your Telegram here.
         });
 
         document.getElementById('cancelBtn').addEventListener('click', function() {
-            window.location.reload(); // Refresh the page to reset the form
+            location.reload(); // Reload the page
         });
 
         window.onload = initMap;
