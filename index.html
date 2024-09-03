@@ -129,8 +129,8 @@
         <button type="submit" id="confirmInfoBtn" class="blinking">Confirm Info</button>
         <div id="fareDisplay" class="fare"></div>
         <div id="fareDescription" class="fare-description"></div>
-        <button type="button" id="confirmRideBtn" disabled>Confirm Ride!</button>
-        <button type="button" id="cancelBtn" disabled>Cancel</button>
+        <button type="button" id="confirmRideBtn" disabled style="background-color: green;">Confirm Ride!</button>
+        <button type="button" id="cancelBtn" disabled style="background-color: red;">Cancel</button>
     </form>
 
     <div class="eta" id="etaDisplay"></div>
@@ -188,7 +188,7 @@
 
                     if (distance > 2) {
                         extraDistance = distance - 2;
-                        fare += extraDistance * 2.3; // $2.3 per mile after 2 miles
+                        fare += extraDistance * 2; // $2 per mile after 2 miles
                     }
 
                     if (travelTime > 10) {
@@ -197,11 +197,15 @@
                     }
 
                     document.getElementById("fareDisplay").innerText = `Estimated Fare: $${fare.toFixed(2)}`;
-                    document.getElementById("fareDescription").innerText = `This fare includes a $10 base fare covering up to 2 miles or 10 minutes of travel. Additional miles are charged at $2.3 per mile, and additional minutes are charged at $0.20 per minute.`;
+                    document.getElementById("fareDescription").innerText = `This fare includes a $10 base fare covering up to 2 miles or 10 minutes of travel. Additional miles are charged at $2 per mile, and additional minutes are charged at $0.20 per minute.`;
 
                     pickupMarker.setPosition(response.routes[0].legs[0].start_location);
                     dropoffMarker.setPosition(response.routes[0].legs[0].end_location);
                     directionsRenderer.setDirections(response);
+
+                    // Show ETA based on real-time traffic
+                    const eta = response.routes[0].legs[0].duration_in_traffic.text;
+                    document.getElementById("etaDisplay").innerText = `Estimated Time of Arrival: ${eta}`;
 
                     // Enable the confirm and cancel buttons
                     document.getElementById('confirmRideBtn').disabled = false;
