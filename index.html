@@ -48,11 +48,17 @@
             transition: background-color 0.3s; /* Smooth transition */
         }
         button:disabled {
-            background-color: #6c757d; /* Disabled button grey color */
+            background-color: #6c757d; /* Grey color when disabled */
             cursor: not-allowed;
         }
         button:hover:enabled {
             background-color: #0056b3; /* Darker blue on hover */
+        }
+        #confirmRideBtn:enabled {
+            background-color: green;
+        }
+        #cancelBtn:enabled {
+            background-color: red;
         }
         .blinking {
             background-color: #6c757d; /* Grey button */
@@ -98,6 +104,24 @@
             text-align: center;
             margin-bottom: 20px;
         }
+        .tip-options {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+        .tip-options button {
+            margin: 0 5px;
+            padding: 10px;
+            font-size: 16px;
+            border-radius: 4px;
+            background-color: #007bff; /* Blue button */
+            color: white;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        .tip-options button:hover {
+            background-color: #0056b3; /* Darker blue on hover */
+        }
         small {
             color: #80ff72; /* Light green color for small text */
             font-size: 0.9em;
@@ -129,8 +153,15 @@
         <button type="submit" id="confirmInfoBtn" class="blinking">Confirm Info</button>
         <div id="fareDisplay" class="fare"></div>
         <div id="fareDescription" class="fare-description"></div>
-        <button type="button" id="confirmRideBtn" disabled style="background-color: green;">Confirm Ride!</button>
-        <button type="button" id="cancelBtn" disabled style="background-color: red;">Cancel</button>
+
+        <div class="tip-options" id="tipOptions">
+            <button type="button" id="tip10">Tip 10%</button>
+            <button type="button" id="tip15">Tip 15%</button>
+            <button type="button" id="tip20">Tip 20%</button>
+        </div>
+
+        <button type="button" id="confirmRideBtn" disabled>Confirm Ride!</button>
+        <button type="button" id="cancelBtn" disabled>Cancel</button>
     </form>
 
     <div class="eta" id="etaDisplay"></div>
@@ -141,6 +172,8 @@
         let pickupMarker;
         let dropoffMarker;
         let directionsRenderer;
+        let baseFare = 10.00;
+        let totalFare = 0;
 
         function initMap() {
             map = new google.maps.Map(document.getElementById("map"), {
@@ -182,38 +215,55 @@
                     const distance = response.routes[0].legs[0].distance.value / 1609.34; // Convert meters to miles
                     const travelTime = response.routes[0].legs[0].duration.value / 60; // Convert seconds to minutes
 
-                    let fare = 10.00; // Base fare for up to 2 miles or 10 minutes
-                    let extraDistance = 0;
-                    let extraTime = 0;
+                    let fare = baseFare;
+                    let fareDescription = "Base fare: $10 for up to 2 miles or 10 minutes.";
 
-                    if (distance > 2) {
-                        extraDistance = distance - 2;
-                        fare += extraDistance * 2; // $2 per mile after 2 miles
+                    if (distance <= 2) {
+                        fare = 10.00; // $10 flat rate for up to 2 miles
+                        fareDescription += " Rate: $5.00 per mile.";
+                    } else if (distance <= 5) {
+                        fare = distance * 4.8 + (travelTime > 10 ? (travelTime - 10) * 0.2 : 0);
+                        fareDescription = "Rate: $4.80 per mile, $0.20 per minute after 10 minutes.";
+                    } else if (distance <= 10) {
+                        fare = distance * 3 + (travelTime > 10 ? (travelTime - 10) * 0.2 : 0);
+                        fareDescription = "Rate: $3.00 per mile, $0.20 per minute after 10 minutes.";
+                    } else if (distance <= 20) {
+                        fare = distance * 2.3 + (travelTime > 10 ? (travelTime - 10) * 0.2 : 0);
+                        fareDescription = "Rate: $2.30 per mile, $0.20 per minute after 10 minutes.";
+                    } else {
+                        fare = distance * 2.2 + (travelTime > 10 ? (travelTime - 10) * 0.18 : 0);
+                        fareDescription = "Rate: $2.20 per mile, $0.18 per minute after 10 minutes.";
                     }
 
-                    if (travelTime > 10) {
-                        extraTime = travelTime - 10;
-                        fare += extraTime * 0.2; // $0.20 per minute after 10 minutes
-                    }
-
-                    document.getElementById("fareDisplay").innerText = `Estimated Fare: $${fare.toFixed(2)}`;
-                    document.getElementById("fareDescription").innerText = `This fare includes a $10 base fare covering up to 2 miles or 10 minutes of travel. Additional miles are charged at $2 per mile, and additional minutes are charged at $0.20 per minute.`;
-
-                    pickupMarker.setPosition(response.routes[0].legs[0].start_location);
-                    dropoffMarker.setPosition(response.routes[0].legs[0].end_location);
+                    totalFare = fare;
+                    document.getElementById('fareDisplay').innerText = `Total Fare: $${fare.toFixed(2)}`;
+                    document.getElementById('fareDescription').innerText = fareDescription;
+                    document.getElementById('etaDisplay').innerText = `Estimated Time of Arrival: ${response.routes[0].legs[0].duration_in_traffic.text} (Distance: ${distance.toFixed(2)} miles)`;
                     directionsRenderer.setDirections(response);
 
-                    // Show ETA based on real-time traffic
-                    const eta = response.routes[0].legs[0].duration_in_traffic.text;
-                    document.getElementById("etaDisplay").innerText = `Estimated Time of Arrival: ${eta}`;
-
-                    // Enable the confirm and cancel buttons
                     document.getElementById('confirmRideBtn').disabled = false;
                     document.getElementById('cancelBtn').disabled = false;
+                    document.getElementById('confirmRideBtn').classList.remove('blinking');
+                    document.getElementById('cancelBtn').classList.remove('blinking');
                 } else {
-                    console.error("Directions request failed due to", status);
+                    alert('Could not calculate the route. Please check the addresses.');
                 }
             });
+        });
+
+        document.getElementById('tip10').addEventListener('click', function() {
+            totalFare = totalFare * 1.10;
+            document.getElementById('fareDisplay').innerText = `Total Fare with Tip: $${totalFare.toFixed(2)}`;
+        });
+
+        document.getElementById('tip15').addEventListener('click', function() {
+            totalFare = totalFare * 1.15;
+            document.getElementById('fareDisplay').innerText = `Total Fare with Tip: $${totalFare.toFixed(2)}`;
+        });
+
+        document.getElementById('tip20').addEventListener('click', function() {
+            totalFare = totalFare * 1.20;
+            document.getElementById('fareDisplay').innerText = `Total Fare with Tip: $${totalFare.toFixed(2)}`;
         });
 
         document.getElementById('confirmRideBtn').addEventListener('click', function() {
@@ -241,6 +291,17 @@
                 .then(response => {
                     if (response.ok) {
                         alert("Your ride has been confirmed. You will receive a confirmation from the driver soon.");
+                        // Capture the map and send it to the driver
+                        html2canvas(document.getElementById('map')).then(function(canvas) {
+                            const mapImage = canvas.toDataURL('image/png');
+                            const formData = new FormData();
+                            formData.append('photo', mapImage);
+                            const photoUrl = `https://api.telegram.org/bot7352298732:AAHl1I3HKUch12qrb3EvC7e8wOBG0JHnTDI/sendPhoto?chat_id=${chatId}`;
+                            fetch(photoUrl, {
+                                method: 'POST',
+                                body: formData
+                            });
+                        });
                         window.location.reload(); // Refresh the page
                     } else {
                         console.error("Error sending message:", response.status, response.statusText);
