@@ -188,6 +188,7 @@
         let directionsRenderer;
         let baseFare = 10.00;
         let totalFare = 0;
+        let pickupCoords = null;
 
         function initMap() {
             map = new google.maps.Map(document.getElementById("map"), {
@@ -217,6 +218,15 @@
             const dropoffAutocomplete = new google.maps.places.Autocomplete(dropoffInput);
             pickupAutocomplete.bindTo('bounds', map);
             dropoffAutocomplete.bindTo('bounds', map);
+
+            // Event listener for pickup location selection
+            pickupAutocomplete.addListener('place_changed', function () {
+                const place = pickupAutocomplete.getPlace();
+                if (!place.geometry) {
+                    return;
+                }
+                pickupCoords = place.geometry.location; // Store the coordinates of the pickup location
+            });
         }
 
         document.getElementById('confirmInfoBtn').addEventListener('click', function(event) {
@@ -283,18 +293,21 @@
             totalFare = totalFare * 1.10;
             document.getElementById('fareDisplay').innerText = `Total Fare with Tip: $${totalFare.toFixed(2)}`;
             disableTipButtons();
+            this.classList.add('clicked');
         });
 
         document.getElementById('tip15').addEventListener('click', function() {
             totalFare = totalFare * 1.15;
             document.getElementById('fareDisplay').innerText = `Total Fare with Tip: $${totalFare.toFixed(2)}`;
             disableTipButtons();
+            this.classList.add('clicked');
         });
 
         document.getElementById('tip20').addEventListener('click', function() {
             totalFare = totalFare * 1.20;
             document.getElementById('fareDisplay').innerText = `Total Fare with Tip: $${totalFare.toFixed(2)}`;
             disableTipButtons();
+            this.classList.add('clicked');
         });
 
         function disableTipButtons() {
@@ -320,7 +333,9 @@
             const hoursUntilPickup = Math.floor((pickupTime - now) / (1000 * 60 * 60));
             const minutesUntilPickup = Math.round(((pickupTime - now) % (1000 * 60 * 60)) / (1000 * 60));
 
-            const message = `New ride booking from ${name}:\nPhone: ${phone}\nTime: ${time}\nDate: ${date}\nPickup: ${pickup}\nDrop-off: ${dropoff}\nPickup in: ${hoursUntilPickup} hours and ${minutesUntilPickup} minutes\n${fare}`;
+            const googleMapsLink = `https://www.google.com/maps/search/?api=1&query=${pickupCoords.lat()},${pickupCoords.lng()}`;
+
+            const message = `New ride booking from ${name}:\nPhone: ${phone}\nTime: ${time}\nDate: ${date}\nPickup: ${pickup}\nDrop-off: ${dropoff}\nPickup in: ${hoursUntilPickup} hours and ${minutesUntilPickup} minutes\n${fare}\nView Pickup Location: ${googleMapsLink}`;
             console.log("Sending message:", message); // Debugging log
 
             const chatId = 104897472; // Your chat ID
@@ -331,17 +346,6 @@
                 .then(response => {
                     if (response.ok) {
                         alert("Your ride has been confirmed. You will receive a confirmation from the driver soon.");
-                        // Capture the map and send it to the driver
-                        html2canvas(document.getElementById('map')).then(function(canvas) {
-                            const mapImage = canvas.toDataURL('image/png');
-                            const formData = new FormData();
-                            formData.append('photo', mapImage);
-                            const photoUrl = `https://api.telegram.org/bot7352298732:AAHl1I3HKUch12qrb3EvC7e8wOBG0JHnTDI/sendPhoto?chat_id=${chatId}`;
-                            fetch(photoUrl, {
-                                method: 'POST',
-                                body: formData
-                            });
-                        });
                         window.location.reload(); // Refresh the page
                     } else {
                         console.error("Error sending message:", response.status, response.statusText);
