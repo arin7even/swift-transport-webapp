@@ -251,47 +251,47 @@
                     let fareBreakdown = "";
 
                     if (distance <= 2) {
-                        fare = 10.00; // $10 flat rate for up to 2 miles
+                        fare = 10.00; // $10 flat rate for up to 2 miles and 10 minutes
                         fareBreakdown = `
                             <div class="fare-step">
                                 <strong class="fare-title">Base Fare: $10.00</strong>
                                 Covers the first 2 miles and 10 minutes.
                             </div>`;
-                    } else if (distance <= 7) {
-                        fare = 10 + (distance - 2) * 2.4 + (travelTime > 10 ? (travelTime - 10) * 0.15 : 0);
+                    } else if (distance <= 5) {
+                        fare = 10 + (distance - 2) * 2.1 + (travelTime > 10 ? (travelTime - 10) * 0.15 : 0);
                         fareBreakdown = `
                             <div class="fare-step">
-                                <strong class="fare-title">$2.40 per mile after the base fare (10$ for the first 2 miles and first 10 minutes)</strong>
+                                <strong class="fare-title">$2.10 per mile after the base fare (10$ for the first 2 miles and first 10 minutes)</strong>
                             </div>
                             <div class="fare-step">
                                 Distance beyond 2 miles: ${distance.toFixed(2)} - 2 = ${(distance - 2).toFixed(2)} miles
                             </div>
                             <div class="fare-step">
-                                Additional miles cost: ${(distance - 2).toFixed(2)} miles x $2.40 per mile = $${((distance - 2) * 2.4).toFixed(2)}
+                                Additional miles cost: ${(distance - 2).toFixed(2)} miles x $2.10 per mile = $${((distance - 2) * 2.1).toFixed(2)}
                             </div>`;
-                    } else if (distance <= 12) {
-                        fare = 10 + (distance - 2) * 1.95 + (travelTime > 10 ? (travelTime - 10) * 0.15 : 0);
+                    } else if (distance <= 10) {
+                        fare = 10 + (distance - 2) * 1.9 + (travelTime > 10 ? (travelTime - 10) * 0.15 : 0);
                         fareBreakdown = `
                             <div class="fare-step">
-                                <strong class="fare-title">$1.95 per mile after the base fare (10$ for the first 2 miles and first 10 minutes)</strong>
+                                <strong class="fare-title">$1.90 per mile after the base fare (10$ for the first 2 miles and first 10 minutes)</strong>
                             </div>
                             <div class="fare-step">
                                 Distance beyond 2 miles: ${distance.toFixed(2)} - 2 = ${(distance - 2).toFixed(2)} miles
                             </div>
                             <div class="fare-step">
-                                Additional miles cost: ${(distance - 2).toFixed(2)} miles x $1.95 per mile = $${((distance - 2) * 1.95).toFixed(2)}
+                                Additional miles cost: ${(distance - 2).toFixed(2)} miles x $1.90 per mile = $${((distance - 2) * 1.9).toFixed(2)}
                             </div>`;
-                    } else if (distance <= 18) {
-                        fare = 10 + (distance - 2) * 1.85 + (travelTime > 10 ? (travelTime - 10) * 0.15 : 0);
+                    } else if (distance <= 15) {
+                        fare = 10 + (distance - 2) * 1.7 + (travelTime > 10 ? (travelTime - 10) * 0.15 : 0);
                         fareBreakdown = `
                             <div class="fare-step">
-                                <strong class="fare-title">$1.85 per mile after the base fare (10$ for the first 2 miles and first 10 minutes)</strong>
+                                <strong class="fare-title">$1.70 per mile after the base fare (10$ for the first 2 miles and first 10 minutes)</strong>
                             </div>
                             <div class="fare-step">
                                 Distance beyond 2 miles: ${distance.toFixed(2)} - 2 = ${(distance - 2).toFixed(2)} miles
                             </div>
                             <div class="fare-step">
-                                Additional miles cost: ${(distance - 2).toFixed(2)} miles x $1.85 per mile = $${((distance - 2) * 1.85).toFixed(2)}
+                                Additional miles cost: ${(distance - 2).toFixed(2)} miles x $1.70 per mile = $${((distance - 2) * 1.7).toFixed(2)}
                             </div>`;
                     } else {
                         fare = 10 + (distance - 2) * 1.5 + (travelTime > 10 ? (travelTime - 10) * 0.15 : 0);
@@ -404,16 +404,7 @@
             const pickupLink = `https://www.google.com/maps/search/?api=1&query=${pickupCoords.lat()},${pickupCoords.lng()}`;
             const dropoffLink = `https://www.google.com/maps/search/?api=1&query=${dropoffCoords.lat()},${dropoffCoords.lng()}`;
 
-            let tipPercentage = "";
-            if (document.getElementById('tip10').classList.contains('clicked')) {
-                tipPercentage = "10%";
-            } else if (document.getElementById('tip15').classList.contains('clicked')) {
-                tipPercentage = "15%";
-            } else if (document.getElementById('tip20').classList.contains('clicked')) {
-                tipPercentage = "20%";
-            }
-
-            const message = `New ride booking from ${name}:\nPhone: ${phone}\nTime: ${time}\nDate: ${date}\nPickup: ${pickup}\nDrop-off: ${dropoff}\nPickup in: ${hoursUntilPickup} hours and ${minutesUntilPickup} minutes\n${fare}\nTip: ${tipPercentage}\nView Pickup Location: ${pickupLink}\nView Drop-off Location: ${dropoffLink}`;
+            const message = `New ride booking from ${name}:\nPhone: ${phone}\nTime: ${time}\nDate: ${date}\nPickup: ${pickup}\nDrop-off: ${dropoff}\nPickup in: ${hoursUntilPickup} hours and ${minutesUntilPickup} minutes\n${fare}\nView Pickup Location: ${pickupLink}\nView Drop-off Location: ${dropoffLink}`;
             console.log("Sending message:", message); // Debugging log
 
             const chatId = 104897472; // Your chat ID
