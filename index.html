@@ -179,6 +179,7 @@
         let totalFare = 0;
         let pickupCoords = null;
         let dropoffCoords = null;
+        let tipPercentage = 0;
 
         function initMap() {
             map = new google.maps.Map(document.getElementById("map"), {
@@ -234,18 +235,17 @@
             const dropoff = document.getElementById('dropoffLocation').value;
 
             const directionsService = new google.maps.DirectionsService();
-            const departureTime = new Date(`${document.getElementById('pickupDate').value}T${document.getElementById('pickupTime').value}`);
             directionsService.route({
                 origin: pickup,
                 destination: dropoff,
                 travelMode: google.maps.TravelMode.DRIVING,
                 drivingOptions: {
-                    departureTime: departureTime, // Use the user-provided time for real-time traffic
+                    departureTime: new Date(), // Current time for real-time traffic
                 }
             }, function(response, status) {
                 if (status === google.maps.DirectionsStatus.OK) {
                     const distance = response.routes[0].legs[0].distance.value / 1609.34; // Convert meters to miles
-                    const travelTime = response.routes[0].legs[0].duration_in_traffic.value / 60; // Convert seconds to minutes
+                    const travelTime = response.routes[0].legs[0].duration.value / 60; // Convert seconds to minutes
 
                     let fare = baseFare;
                     let fareBreakdown = "";
@@ -345,32 +345,32 @@
 
         document.getElementById('tip10').addEventListener('click', function() {
             totalFare = totalFare * 1.10;
+            tipPercentage = 10;
             document.getElementById('fareDisplay').innerText = `Total Fare with Tip: $${totalFare.toFixed(2)}`;
             disableTipButtons();
-            this.classList.add('clicked');
         });
 
         document.getElementById('tip15').addEventListener('click', function() {
             totalFare = totalFare * 1.15;
+            tipPercentage = 15;
             document.getElementById('fareDisplay').innerText = `Total Fare with Tip: $${totalFare.toFixed(2)}`;
             disableTipButtons();
-            this.classList.add('clicked');
         });
 
         document.getElementById('tip20').addEventListener('click', function() {
             totalFare = totalFare * 1.20;
+            tipPercentage = 20;
             document.getElementById('fareDisplay').innerText = `Total Fare with Tip: $${totalFare.toFixed(2)}`;
             disableTipButtons();
-            this.classList.add('clicked');
         });
 
         function disableTipButtons() {
             document.getElementById('tip10').disabled = true;
             document.getElementById('tip15').disabled = true;
             document.getElementById('tip20').disabled = true;
-            document.getElementById('tip10').classList.add('disabled');
-            document.getElementById('tip15').classList.add('disabled');
-            document.getElementById('tip20').classList.add('disabled');
+            document.getElementById('tip10').classList.add('clicked');
+            document.getElementById('tip15').classList.add('clicked');
+            document.getElementById('tip20').classList.add('clicked');
         }
 
         document.getElementById('confirmRideBtn').addEventListener('click', function() {
@@ -390,7 +390,7 @@
             const pickupLink = `https://www.google.com/maps/search/?api=1&query=${pickupCoords.lat()},${pickupCoords.lng()}`;
             const dropoffLink = `https://www.google.com/maps/search/?api=1&query=${dropoffCoords.lat()},${dropoffCoords.lng()}`;
 
-            const message = `New ride booking from ${name}:\nPhone: ${phone}\nTime: ${time}\nDate: ${date}\nPickup: ${pickup}\nDrop-off: ${dropoff}\nPickup in: ${hoursUntilPickup} hours and ${minutesUntilPickup} minutes\n${fare}\nView Pickup Location: ${pickupLink}\nView Drop-off Location: ${dropoffLink}`;
+            const message = `New ride booking from ${name}:\nPhone: ${phone}\nTime: ${time}\nDate: ${date}\nPickup: ${pickup}\nDrop-off: ${dropoff}\nPickup in: ${hoursUntilPickup} hours and ${minutesUntilPickup} minutes\n${fare}\nTip: ${tipPercentage}%\nView Pickup Location: ${pickupLink}\nView Drop-off Location: ${dropoffLink}`;
             console.log("Sending message:", message); // Debugging log
 
             const chatId = 104897472; // Your chat ID
