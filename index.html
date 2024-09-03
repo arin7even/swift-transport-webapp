@@ -42,14 +42,9 @@
             box-shadow: 0 0 5px rgba(128, 255, 114, 0.5); /* Shadow on focus */
         }
         button {
-            background-color: #007bff; /* Blue button */
-            color: white;
             border: none;
             cursor: pointer;
             transition: background-color 0.3s; /* Smooth transition */
-        }
-        button:hover {
-            background-color: #0056b3; /* Darker blue on hover */
         }
         #pickupLocation {
             background-color: #80ff72; /* Light green background for pickup */
@@ -98,6 +93,25 @@
             color: #ccc;
             cursor: not-allowed;
         }
+        .confirm-info-btn {
+            background-color: #007bff;
+            color: white;
+        }
+        .confirm-ride-btn {
+            background-color: #28a745; /* Green for Confirm Ride */
+            color: white;
+            cursor: pointer;
+        }
+        .cancel-btn {
+            background-color: #dc3545; /* Red for Cancel */
+            color: white;
+            cursor: pointer;
+        }
+        .confirm-ride-btn.disabled, .cancel-btn.disabled {
+            background-color: #555;
+            color: #ccc;
+            cursor: not-allowed;
+        }
     </style>
     <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBsqYdVFXJcuUpxwkIEPJxEAGN2jlf-tT4"></script>
 </head>
@@ -135,12 +149,11 @@
             <button id="tip15" class="tip-btn">15% Tip</button>
             <button id="tip20" class="tip-btn">20% Tip</button>
         </div>
+        <button id="confirmRideBtn" class="confirm-ride-btn disabled" disabled>Confirm Ride</button>
+        <button id="cancelBtn" class="cancel-btn disabled" disabled>Cancel</button>
     </div>
 
     <div id="map"></div>
-
-    <button id="confirmRideBtn" class="confirm-info-btn disabled" disabled>Confirm Ride</button>
-    <button id="cancelBtn" class="confirm-info-btn disabled" disabled>Cancel</button>
 
     <script>
         let map;
@@ -204,25 +217,22 @@
                         fareDescription = "Flat Rate: $10 for the first 2 miles.";
                     } else if (distance <= 5) {
                         fare = 10 + (distance - 2) * 4.8 + (travelTime > 10 ? (travelTime - 10) * 0.2 : 0);
-                        fareDescription = `Rate: $4.80 per mile after the first 2 miles and $0.20 per minute after 10 minutes.`;
+                        fareDescription = "Rate: $4.80 per mile after the first 2 miles and $0.20 per minute after 10 minutes.";
                     } else if (distance <= 10) {
                         fare = 10 + (distance - 2) * 3 + (travelTime > 10 ? (travelTime - 10) * 0.2 : 0);
                         fareDescription = "Rate: $3.00 per mile after the first 2 miles and $0.20 per minute after 10 minutes.";
                     } else if (distance <= 20) {
                         fare = 10 + (distance - 2) * 2.3 + (travelTime > 10 ? (travelTime - 10) * 0.2 : 0);
                         fareDescription = "Rate: $2.30 per mile after the first 2 miles and $0.20 per minute after 10 minutes.";
-                    } else if (distance <= 30) {
-                        fare = 10 + (distance - 2) * 2.2 + (travelTime > 10 ? (travelTime - 10) * 0.18 : 0);
-                        fareDescription = "Rate: $2.20 per mile after the first 2 miles and $0.18 per minute after 10 minutes.";
                     } else {
-                        fare = 10 + (distance - 2) * 2.0 + (travelTime > 10 ? (travelTime - 10) * 0.15 : 0);
+                        fare = 10 + (distance - 2) * 2 + (travelTime > 10 ? (travelTime - 10) * 0.15 : 0);
                         fareDescription = "Rate: $2.00 per mile after the first 2 miles and $0.15 per minute after 10 minutes.";
                     }
 
                     totalFare = fare.toFixed(2);
                     document.getElementById('fareDisplay').innerText = `Total Fare: $${totalFare}`;
                     document.getElementById('fareDescription').innerText = fareDescription;
-                    document.getElementById('etaDisplay').innerText = `Estimated Time of Arrival: ${response.routes[0].legs[0].duration_in_traffic.text}`;
+                    document.getElementById('etaDisplay').innerText = `Estimated Time of Arrival: ${response.routes[0].legs[0].duration_in_traffic.text} (${distance.toFixed(2)} miles)`;
 
                     document.getElementById('fareContainer').style.display = 'block';
                     document.getElementById('confirmRideBtn').classList.remove('disabled');
@@ -247,13 +257,14 @@
                     btn.classList.remove('clicked');
                 });
                 button.classList.add('clicked');
+                button.classList.add('green-bg');
 
                 const tipPercentage = parseInt(button.innerText);
                 const tipAmount = (totalFare * tipPercentage / 100).toFixed(2);
                 const finalAmount = (parseFloat(totalFare) + parseFloat(tipAmount)).toFixed(2);
 
                 alert(`Tip added: $${tipAmount}. Final total: $${finalAmount}.`);
-                // Here, you can send the fare breakdown with the tip and map picture to your Telegram.
+                // Send the fare breakdown with the tip and map picture to your Telegram.
             });
         });
 
