@@ -224,7 +224,7 @@
                         fareDescription += " Rate: $5.00 per mile.";
                     } else if (distance <= 5) {
                         fare = distance * 4.8 + (travelTime > 10 ? (travelTime - 10) * 0.2 : 0);
-                        fareDescription = `Rate: $4.80 per mile and $0.20 per minute after 10 minutes.`;
+                        fareDescription = `Rate: $4.80 per mile after the first 2 miles and $0.20 per minute after 10 minutes.`;
                     } else if (distance <= 10) {
                         fare = 10 + (distance - 2) * 3 + (travelTime > 10 ? (travelTime - 10) * 0.2 : 0);
                         fareDescription = "Rate: $3.00 per mile after the first 2 miles and $0.20 per minute after 10 minutes.";
@@ -242,6 +242,10 @@
                     document.getElementById('etaDisplay').innerText = `Estimated Time of Arrival: ${response.routes[0].legs[0].duration_in_traffic.text} (Distance: ${distance.toFixed(2)} miles)`;
                     directionsRenderer.setDirections(response);
 
+                    // Set markers
+                    pickupMarker.setPosition(response.routes[0].legs[0].start_location);
+                    dropoffMarker.setPosition(response.routes[0].legs[0].end_location);
+
                     document.getElementById('tipOptions').style.visibility = 'visible'; // Show tip options
                     document.getElementById('confirmRideBtn').disabled = false;
                     document.getElementById('cancelBtn').disabled = false;
@@ -256,17 +260,26 @@
         document.getElementById('tip10').addEventListener('click', function() {
             totalFare = totalFare * 1.10;
             document.getElementById('fareDisplay').innerText = `Total Fare with Tip: $${totalFare.toFixed(2)}`;
+            disableTipButtons();
         });
 
         document.getElementById('tip15').addEventListener('click', function() {
             totalFare = totalFare * 1.15;
             document.getElementById('fareDisplay').innerText = `Total Fare with Tip: $${totalFare.toFixed(2)}`;
+            disableTipButtons();
         });
 
         document.getElementById('tip20').addEventListener('click', function() {
             totalFare = totalFare * 1.20;
             document.getElementById('fareDisplay').innerText = `Total Fare with Tip: $${totalFare.toFixed(2)}`;
+            disableTipButtons();
         });
+
+        function disableTipButtons() {
+            document.getElementById('tip10').disabled = true;
+            document.getElementById('tip15').disabled = true;
+            document.getElementById('tip20').disabled = true;
+        }
 
         document.getElementById('confirmRideBtn').addEventListener('click', function() {
             const name = document.getElementById('name').value;
