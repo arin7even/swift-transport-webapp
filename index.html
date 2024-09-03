@@ -270,16 +270,16 @@
                                 Additional miles cost: ${(distance - 2).toFixed(2)} miles x $2.40 per mile = $${((distance - 2) * 2.4).toFixed(2)}
                             </div>`;
                     } else if (distance <= 12) {
-                        fare = 10 + (distance - 2) * 2.15 + (travelTime > 10 ? (travelTime - 10) * 0.15 : 0);
+                        fare = 10 + (distance - 2) * 1.95 + (travelTime > 10 ? (travelTime - 10) * 0.15 : 0);
                         fareBreakdown = `
                             <div class="fare-step">
-                                <strong class="fare-title">$2.15 per mile after the base fare (10$ for the first 2 miles and first 10 minutes)</strong>
+                                <strong class="fare-title">$1.95 per mile after the base fare (10$ for the first 2 miles and first 10 minutes)</strong>
                             </div>
                             <div class="fare-step">
                                 Distance beyond 2 miles: ${distance.toFixed(2)} - 2 = ${(distance - 2).toFixed(2)} miles
                             </div>
                             <div class="fare-step">
-                                Additional miles cost: ${(distance - 2).toFixed(2)} miles x $2.15 per mile = $${((distance - 2) * 2.15).toFixed(2)}
+                                Additional miles cost: ${(distance - 2).toFixed(2)} miles x $1.95 per mile = $${((distance - 2) * 1.95).toFixed(2)}
                             </div>`;
                     } else if (distance <= 18) {
                         fare = 10 + (distance - 2) * 1.85 + (travelTime > 10 ? (travelTime - 10) * 0.15 : 0);
@@ -294,16 +294,16 @@
                                 Additional miles cost: ${(distance - 2).toFixed(2)} miles x $1.85 per mile = $${((distance - 2) * 1.85).toFixed(2)}
                             </div>`;
                     } else {
-                        fare = 10 + (distance - 2) * 1.75 + (travelTime > 10 ? (travelTime - 10) * 0.15 : 0);
+                        fare = 10 + (distance - 2) * 1.5 + (travelTime > 10 ? (travelTime - 10) * 0.15 : 0);
                         fareBreakdown = `
                             <div class="fare-step">
-                                <strong class="fare-title">$1.75 per mile after the base fare (10$ for the first 2 miles and first 10 minutes)</strong>
+                                <strong class="fare-title">$1.50 per mile after the base fare (10$ for the first 2 miles and first 10 minutes)</strong>
                             </div>
                             <div class="fare-step">
                                 Distance beyond 2 miles: ${distance.toFixed(2)} - 2 = ${(distance - 2).toFixed(2)} miles
                             </div>
                             <div class="fare-step">
-                                Additional miles cost: ${(distance - 2).toFixed(2)} miles x $1.75 per mile = $${((distance - 2) * 1.75).toFixed(2)}
+                                Additional miles cost: ${(distance - 2).toFixed(2)} miles x $1.50 per mile = $${((distance - 2) * 1.5).toFixed(2)}
                             </div>`;
                     }
 
