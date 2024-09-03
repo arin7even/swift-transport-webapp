@@ -177,9 +177,9 @@
         let directionsRenderer;
         let baseFare = 10.00;
         let totalFare = 0;
+        let tipPercentage = 0;
         let pickupCoords = null;
         let dropoffCoords = null;
-        let tipPercentage = 0;
 
         function initMap() {
             map = new google.maps.Map(document.getElementById("map"), {
@@ -235,17 +235,18 @@
             const dropoff = document.getElementById('dropoffLocation').value;
 
             const directionsService = new google.maps.DirectionsService();
+            const departureTime = new Date(`${document.getElementById('pickupDate').value}T${document.getElementById('pickupTime').value}`);
             directionsService.route({
                 origin: pickup,
                 destination: dropoff,
                 travelMode: google.maps.TravelMode.DRIVING,
                 drivingOptions: {
-                    departureTime: new Date(), // Current time for real-time traffic
+                    departureTime: departureTime, // Use the user-provided time for real-time traffic
                 }
             }, function(response, status) {
                 if (status === google.maps.DirectionsStatus.OK) {
                     const distance = response.routes[0].legs[0].distance.value / 1609.34; // Convert meters to miles
-                    const travelTime = response.routes[0].legs[0].duration.value / 60; // Convert seconds to minutes
+                    const travelTime = response.routes[0].legs[0].duration_in_traffic.value / 60; // Convert seconds to minutes
 
                     let fare = baseFare;
                     let fareBreakdown = "";
@@ -296,6 +297,7 @@
                     }
 
                     if (travelTime > 10) {
+                        fare += (travelTime - 10) * 0.2; // Add extra time cost to the fare
                         fareBreakdown += `
                             <div class="fare-step">
                                 <strong class="fare-title">Additional Time:</strong>
@@ -312,7 +314,7 @@
                             Base fare: $10.00
                         </div>
                         <div class="fare-step">
-                            Additional miles cost: $${(fare - 10).toFixed(2)}
+                            Additional miles cost: $${(fare - 10 - (travelTime > 10 ? (travelTime - 10) * 0.2 : 0)).toFixed(2)}
                         </div>
                         <div class="fare-step">
                             Additional time cost: $${(travelTime > 10 ? (travelTime - 10) * 0.2 : 0).toFixed(2)}
@@ -344,33 +346,32 @@
         });
 
         document.getElementById('tip10').addEventListener('click', function() {
-            totalFare = totalFare * 1.10;
             tipPercentage = 10;
+            totalFare = totalFare * 1.10;
             document.getElementById('fareDisplay').innerText = `Total Fare with Tip: $${totalFare.toFixed(2)}`;
             disableTipButtons();
         });
 
         document.getElementById('tip15').addEventListener('click', function() {
-            totalFare = totalFare * 1.15;
             tipPercentage = 15;
+            totalFare = totalFare * 1.15;
             document.getElementById('fareDisplay').innerText = `Total Fare with Tip: $${totalFare.toFixed(2)}`;
             disableTipButtons();
         });
 
         document.getElementById('tip20').addEventListener('click', function() {
-            totalFare = totalFare * 1.20;
             tipPercentage = 20;
+            totalFare = totalFare * 1.20;
             document.getElementById('fareDisplay').innerText = `Total Fare with Tip: $${totalFare.toFixed(2)}`;
             disableTipButtons();
         });
 
         function disableTipButtons() {
-            document.getElementById('tip10').disabled = true;
-            document.getElementById('tip15').disabled = true;
-            document.getElementById('tip20').disabled = true;
-            document.getElementById('tip10').classList.add('clicked');
-            document.getElementById('tip15').classList.add('clicked');
-            document.getElementById('tip20').classList.add('clicked');
+            const tipButtons = document.querySelectorAll('.tip-options button');
+            tipButtons.forEach(button => {
+                button.disabled = true;
+                button.classList.add('clicked');
+            });
         }
 
         document.getElementById('confirmRideBtn').addEventListener('click', function() {
