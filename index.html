@@ -189,6 +189,7 @@
         let baseFare = 10.00;
         let totalFare = 0;
         let pickupCoords = null;
+        let dropoffCoords = null;
 
         function initMap() {
             map = new google.maps.Map(document.getElementById("map"), {
@@ -226,6 +227,15 @@
                     return;
                 }
                 pickupCoords = place.geometry.location; // Store the coordinates of the pickup location
+            });
+
+            // Event listener for dropoff location selection
+            dropoffAutocomplete.addListener('place_changed', function () {
+                const place = dropoffAutocomplete.getPlace();
+                if (!place.geometry) {
+                    return;
+                }
+                dropoffCoords = place.geometry.location; // Store the coordinates of the dropoff location
             });
         }
 
@@ -333,9 +343,10 @@
             const hoursUntilPickup = Math.floor((pickupTime - now) / (1000 * 60 * 60));
             const minutesUntilPickup = Math.round(((pickupTime - now) % (1000 * 60 * 60)) / (1000 * 60));
 
-            const googleMapsLink = `https://www.google.com/maps/search/?api=1&query=${pickupCoords.lat()},${pickupCoords.lng()}`;
+            const pickupLink = `https://www.google.com/maps/search/?api=1&query=${pickupCoords.lat()},${pickupCoords.lng()}`;
+            const dropoffLink = `https://www.google.com/maps/search/?api=1&query=${dropoffCoords.lat()},${dropoffCoords.lng()}`;
 
-            const message = `New ride booking from ${name}:\nPhone: ${phone}\nTime: ${time}\nDate: ${date}\nPickup: ${pickup}\nDrop-off: ${dropoff}\nPickup in: ${hoursUntilPickup} hours and ${minutesUntilPickup} minutes\n${fare}\nView Pickup Location: ${googleMapsLink}`;
+            const message = `New ride booking from ${name}:\nPhone: ${phone}\nTime: ${time}\nDate: ${date}\nPickup: ${pickup}\nDrop-off: ${dropoff}\nPickup in: ${hoursUntilPickup} hours and ${minutesUntilPickup} minutes\n${fare}\nView Pickup Location: ${pickupLink}\nView Drop-off Location: ${dropoffLink}`;
             console.log("Sending message:", message); // Debugging log
 
             const chatId = 104897472; // Your chat ID
