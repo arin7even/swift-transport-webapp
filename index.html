@@ -3,76 +3,88 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>QuickRide - Book Your Ride Now</title>
+    <title>NightRide - Your Evening Transport Solution</title>
     <style>
         body {
-            font-family: 'Roboto', sans-serif;
+            font-family: 'Poppins', sans-serif;
             margin: 0;
             padding: 0;
-            background-color: #f0f4f8; /* Light grey background */
-            color: #333; /* Darker text for readability */
+            background-color: #1e1e2f; /* Dark background */
+            color: #c7c7c7; /* Light grey text */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
         }
         header {
-            background-color: #ff6f61; /* Coral header for a modern look */
-            padding: 20px;
             text-align: center;
-            color: white;
+            margin-bottom: 20px;
         }
         h1 {
-            margin: 0;
+            color: #ffffff;
             font-size: 2.5em;
+            margin: 0;
+        }
+        p {
+            color: #b8b8d1;
+            margin: 0;
         }
         main {
+            background-color: #2c2c44; /* Slightly lighter dark background */
             padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.5);
+            width: 100%;
+            max-width: 500px;
         }
         form {
             display: flex;
             flex-direction: column;
-            max-width: 400px;
-            margin: 0 auto;
-            padding: 20px;
-            background-color: white;
-            border-radius: 10px;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
         }
         label {
             margin-bottom: 8px;
+            color: #e0e0ff;
             font-weight: bold;
-            color: #555;
         }
-        input, button, select {
-            padding: 10px;
+        input, button {
+            padding: 12px;
             margin-bottom: 15px;
-            border-radius: 5px;
-            border: 1px solid #ccc;
+            border-radius: 8px;
+            border: none;
             font-size: 16px;
-            outline: none;
+            color: #1e1e2f;
+            transition: all 0.3s;
         }
-        input:focus, select:focus {
-            border-color: #ff6f61;
-            box-shadow: 0 0 5px rgba(255, 111, 97, 0.5);
+        input {
+            background-color: #ffffff;
+        }
+        input:focus {
+            outline: none;
+            box-shadow: 0 0 10px rgba(128, 128, 255, 0.5);
         }
         button {
-            background-color: #ff6f61;
-            color: white;
-            border: none;
+            background-color: #5a5aff; /* Bright blue button */
+            color: #ffffff;
             cursor: pointer;
             transition: background-color 0.3s;
         }
         button:hover {
-            background-color: #e65c55;
+            background-color: #4747d1;
         }
         #map {
             height: 300px;
             width: 100%;
+            border-radius: 8px;
             margin-top: 20px;
         }
         .fare-summary {
+            display: none;
             margin-top: 20px;
             padding: 15px;
-            background-color: #e0f7fa; /* Light teal background */
+            background-color: #444466; /* Dark blue background */
             border-radius: 8px;
-            color: #00796b; /* Teal text for the fare summary */
+            color: #e0e0ff;
+            text-align: center;
         }
     </style>
     <script src="https://maps.googleapis.com/maps/api/js?key=YOUR_API_KEY&libraries=places"></script>
@@ -80,8 +92,8 @@
 <body>
 
 <header>
-    <h1>QuickRide</h1>
-    <p>Your fast and reliable transport service</p>
+    <h1>NightRide</h1>
+    <p>Your reliable night-time transport service</p>
 </header>
 
 <main>
@@ -107,7 +119,7 @@
         <button type="submit">Calculate Fare</button>
     </form>
 
-    <div id="fareSummary" class="fare-summary" style="display: none;">
+    <div id="fareSummary" class="fare-summary">
         <h2>Estimated Fare</h2>
         <p id="fareDisplay"></p>
     </div>
@@ -125,7 +137,32 @@
     function initMap() {
         map = new google.maps.Map(document.getElementById("map"), {
             zoom: 12,
-            center: { lat: 37.7749, lng: -122.4194 }, // San Francisco
+            center: { lat: 40.7128, lng: -74.0060 }, // New York City
+            styles: [
+                { elementType: 'geometry', stylers: [{ color: '#2c2c44' }] },
+                { elementType: 'labels.text.stroke', stylers: [{ color: '#2c2c44' }] },
+                { elementType: 'labels.text.fill', stylers: [{ color: '#ffffff' }] },
+                {
+                    featureType: 'road',
+                    elementType: 'geometry',
+                    stylers: [{ color: '#444466' }]
+                },
+                {
+                    featureType: 'road',
+                    elementType: 'geometry.stroke',
+                    stylers: [{ color: '#212121' }]
+                },
+                {
+                    featureType: 'water',
+                    elementType: 'geometry',
+                    stylers: [{ color: '#1a1a32' }]
+                },
+                {
+                    featureType: 'landscape',
+                    elementType: 'geometry',
+                    stylers: [{ color: '#33334d' }]
+                }
+            ]
         });
 
         directionsService = new google.maps.DirectionsService();
@@ -174,8 +211,8 @@
                 directionsRenderer.setDirections(response);
 
                 const distance = response.routes[0].legs[0].distance.value / 1609.34; // Convert meters to miles
-                const baseFare = 5.00; // Base fare
-                const costPerMile = 3.00; // Cost per mile
+                const baseFare = 8.00; // Base fare
+                const costPerMile = 3.50; // Cost per mile
                 const totalFare = baseFare + (distance * costPerMile);
 
                 document.getElementById('fareDisplay').innerText = `Total Fare: $${totalFare.toFixed(2)} for ${distance.toFixed(2)} miles`;
@@ -191,9 +228,3 @@
 
 </body>
 </html>
-
-
-
-
-
-
