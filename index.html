@@ -3,39 +3,47 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NightRide - Your Evening Transport Solution</title>
+    <title>ProRide - Premium Transport Service</title>
     <style>
         body {
-            font-family: 'Poppins', sans-serif;
+            font-family: 'Montserrat', sans-serif;
             margin: 0;
             padding: 0;
-            background-color: #1e1e2f; /* Dark background */
-            color: #c7c7c7; /* Light grey text */
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
+            background-color: #1b1b2f; /* Deep dark background */
+            color: #f0f0f0; /* Light text */
         }
         header {
+            background-color: #ff4757; /* Bright red for attention */
+            padding: 20px;
             text-align: center;
-            margin-bottom: 20px;
+            color: white;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
         }
         h1 {
-            color: #ffffff;
-            font-size: 2.5em;
-            margin: 0;
-        }
-        p {
-            color: #b8b8d1;
+            font-size: 3em;
             margin: 0;
         }
         main {
-            background-color: #2c2c44; /* Slightly lighter dark background */
             padding: 20px;
-            border-radius: 12px;
-            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.5);
-            width: 100%;
-            max-width: 500px;
+            max-width: 1200px;
+            margin: 20px auto;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+        .sidebar, .content {
+            background-color: #2f2f3e;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5);
+        }
+        .sidebar {
+            flex: 1;
+            max-width: 300px;
+        }
+        .content {
+            flex: 3;
+            min-width: 600px;
         }
         form {
             display: flex;
@@ -43,48 +51,113 @@
         }
         label {
             margin-bottom: 8px;
-            color: #e0e0ff;
             font-weight: bold;
+            color: #a1a1b8;
         }
-        input, button {
+        input, button, select {
             padding: 12px;
             margin-bottom: 15px;
             border-radius: 8px;
             border: none;
             font-size: 16px;
-            color: #1e1e2f;
-            transition: all 0.3s;
+            outline: none;
         }
         input {
-            background-color: #ffffff;
+            background-color: #3a3a52;
+            color: white;
         }
         input:focus {
             outline: none;
-            box-shadow: 0 0 10px rgba(128, 128, 255, 0.5);
+            box-shadow: 0 0 10px rgba(255, 71, 87, 0.5);
         }
         button {
-            background-color: #5a5aff; /* Bright blue button */
-            color: #ffffff;
+            background-color: #ff4757;
+            color: white;
+            border: none;
             cursor: pointer;
             transition: background-color 0.3s;
         }
         button:hover {
-            background-color: #4747d1;
+            background-color: #e84118;
         }
         #map {
-            height: 300px;
+            height: 400px;
             width: 100%;
-            border-radius: 8px;
+            border-radius: 10px;
             margin-top: 20px;
         }
         .fare-summary {
             display: none;
             margin-top: 20px;
             padding: 15px;
-            background-color: #444466; /* Dark blue background */
+            background-color: #3a3a52;
             border-radius: 8px;
-            color: #e0e0ff;
+            color: #ff4757;
             text-align: center;
+        }
+        .multi-step-form {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+        .step {
+            width: 30%;
+            text-align: center;
+            padding: 10px;
+            border-radius: 8px;
+            background-color: #3a3a52;
+            color: #a1a1b8;
+            cursor: pointer;
+        }
+        .step.active {
+            background-color: #ff4757;
+            color: white;
+        }
+        .payment-methods {
+            display: flex;
+            justify-content: space-around;
+            margin-top: 20px;
+        }
+        .payment-methods img {
+            width: 50px;
+            height: auto;
+            cursor: pointer;
+            transition: transform 0.3s;
+        }
+        .payment-methods img:hover {
+            transform: scale(1.1);
+        }
+        .user-profile {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        .user-profile img {
+            border-radius: 50%;
+            width: 80px;
+            height: 80px;
+        }
+        .user-profile .info {
+            flex-grow: 1;
+        }
+        .user-profile .info h3 {
+            margin: 0;
+            color: white;
+        }
+        .user-profile .info p {
+            margin: 0;
+            color: #a1a1b8;
+        }
+        .fare-details {
+            margin-top: 20px;
+            background-color: #444455;
+            padding: 10px;
+            border-radius: 8px;
+            color: white;
+        }
+        .fare-details p {
+            margin: 0;
         }
     </style>
     <script src="https://maps.googleapis.com/maps/api/js?key=YOUR_API_KEY&libraries=places"></script>
@@ -92,39 +165,74 @@
 <body>
 
 <header>
-    <h1>NightRide</h1>
-    <p>Your reliable night-time transport service</p>
+    <h1>ProRide</h1>
+    <p>Experience luxury and convenience in every ride</p>
 </header>
 
 <main>
-    <form id="bookingForm">
-        <label for="name">Full Name</label>
-        <input type="text" id="name" name="name" placeholder="Enter your full name" required>
+    <aside class="sidebar">
+        <div class="user-profile">
+            <img src="https://via.placeholder.com/80" alt="User Profile Picture">
+            <div class="info">
+                <h3>John Doe</h3>
+                <p>Pro Member</p>
+            </div>
+        </div>
+        <p>Your recent rides:</p>
+        <ul>
+            <li>Central Park to Times Square</li>
+            <li>Brooklyn to Manhattan</li>
+            <li>JFK Airport to Empire State Building</li>
+        </ul>
+    </aside>
 
-        <label for="phone">Contact Number</label>
-        <input type="tel" id="phone" name="phone" placeholder="Enter your contact number" required>
+    <section class="content">
+        <div class="multi-step-form">
+            <div class="step active">Step 1: Ride Details</div>
+            <div class="step">Step 2: Select Vehicle</div>
+            <div class="step">Step 3: Payment</div>
+        </div>
 
-        <label for="pickupLocation">Pickup Location</label>
-        <input type="text" id="pickupLocation" name="pickupLocation" placeholder="Enter your pickup location" required>
+        <form id="rideDetailsForm">
+            <label for="pickupLocation">Pickup Location</label>
+            <input type="text" id="pickupLocation" name="pickupLocation" placeholder="Enter your pickup location" required>
 
-        <label for="dropoffLocation">Drop-off Location</label>
-        <input type="text" id="dropoffLocation" name="dropoffLocation" placeholder="Enter your drop-off location" required>
+            <label for="dropoffLocation">Drop-off Location</label>
+            <input type="text" id="dropoffLocation" name="dropoffLocation" placeholder="Enter your drop-off location" required>
 
-        <label for="pickupDate">Pickup Date</label>
-        <input type="date" id="pickupDate" name="pickupDate" required>
+            <label for="pickupDate">Pickup Date</label>
+            <input type="date" id="pickupDate" name="pickupDate" required>
 
-        <label for="pickupTime">Pickup Time</label>
-        <input type="time" id="pickupTime" name="pickupTime" required>
+            <label for="pickupTime">Pickup Time</label>
+            <input type="time" id="pickupTime" name="pickupTime" required>
 
-        <button type="submit">Calculate Fare</button>
-    </form>
+            <label for="vehicleType">Select Vehicle Type</label>
+            <select id="vehicleType" name="vehicleType">
+                <option value="standard">Standard - $1.50/mile</option>
+                <option value="luxury">Luxury - $3.00/mile</option>
+                <option value="suv">SUV - $2.50/mile</option>
+            </select>
 
-    <div id="fareSummary" class="fare-summary">
-        <h2>Estimated Fare</h2>
-        <p id="fareDisplay"></p>
-    </div>
+            <button type="submit">Calculate Fare</button>
+        </form>
 
-    <div id="map"></div>
+        <div id="fareSummary" class="fare-summary">
+            <h2>Estimated Fare</h2>
+            <p id="fareDisplay"></p>
+            <div class="fare-details">
+                <p>Base Fare: $5.00</p>
+                <p id="distanceDisplay"></p>
+                <p id="timeDisplay"></p>
+            </div>
+            <div class="payment-methods">
+                <img src="https://via.placeholder.com/50x50.png?text=Visa" alt="Visa">
+                <img src="https://via.placeholder.com/50x50.png?text=MasterCard" alt="MasterCard">
+                <img src="https://via.placeholder.com/50x50.png?text=PayPal" alt="PayPal">
+            </div>
+        </div>
+
+        <div id="map"></div>
+    </section>
 </main>
 
 <script>
@@ -139,13 +247,13 @@
             zoom: 12,
             center: { lat: 40.7128, lng: -74.0060 }, // New York City
             styles: [
-                { elementType: 'geometry', stylers: [{ color: '#2c2c44' }] },
-                { elementType: 'labels.text.stroke', stylers: [{ color: '#2c2c44' }] },
-                { elementType: 'labels.text.fill', stylers: [{ color: '#ffffff' }] },
+                { elementType: 'geometry', stylers: [{ color: '#2f2f3e' }] },
+                { elementType: 'labels.text.stroke', stylers: [{ color: '#2f2f3e' }] },
+                { elementType: 'labels.text.fill', stylers: [{ color: '#f0f0f0' }] },
                 {
                     featureType: 'road',
                     elementType: 'geometry',
-                    stylers: [{ color: '#444466' }]
+                    stylers: [{ color: '#444455' }]
                 },
                 {
                     featureType: 'road',
@@ -155,12 +263,12 @@
                 {
                     featureType: 'water',
                     elementType: 'geometry',
-                    stylers: [{ color: '#1a1a32' }]
+                    stylers: [{ color: '#1b1b2f' }]
                 },
                 {
                     featureType: 'landscape',
                     elementType: 'geometry',
-                    stylers: [{ color: '#33334d' }]
+                    stylers: [{ color: '#2c2c44' }]
                 }
             ]
         });
@@ -192,7 +300,7 @@
         });
     }
 
-    document.getElementById('bookingForm').addEventListener('submit', function (event) {
+    document.getElementById('rideDetailsForm').addEventListener('submit', function (event) {
         event.preventDefault();
         if (!pickupCoords || !dropoffCoords) {
             alert("Please select valid pickup and drop-off locations.");
@@ -201,6 +309,14 @@
 
         const pickupLocation = document.getElementById('pickupLocation').value;
         const dropoffLocation = document.getElementById('dropoffLocation').value;
+        const vehicleType = document.getElementById('vehicleType').value;
+        let costPerMile = 1.50; // Default to standard
+
+        if (vehicleType === "luxury") {
+            costPerMile = 3.00;
+        } else if (vehicleType === "suv") {
+            costPerMile = 2.50;
+        }
 
         directionsService.route({
             origin: pickupLocation,
@@ -211,11 +327,13 @@
                 directionsRenderer.setDirections(response);
 
                 const distance = response.routes[0].legs[0].distance.value / 1609.34; // Convert meters to miles
-                const baseFare = 8.00; // Base fare
-                const costPerMile = 3.50; // Cost per mile
+                const duration = response.routes[0].legs[0].duration.text;
+                const baseFare = 5.00; // Base fare
                 const totalFare = baseFare + (distance * costPerMile);
 
                 document.getElementById('fareDisplay').innerText = `Total Fare: $${totalFare.toFixed(2)} for ${distance.toFixed(2)} miles`;
+                document.getElementById('distanceDisplay').innerText = `Distance: ${distance.toFixed(2)} miles`;
+                document.getElementById('timeDisplay').innerText = `Estimated Time: ${duration}`;
                 document.getElementById('fareSummary').style.display = 'block';
             } else {
                 alert("Could not calculate the route. Please try again.");
