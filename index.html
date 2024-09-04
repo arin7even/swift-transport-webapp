@@ -354,13 +354,6 @@
             });
         });
 
-        document.getElementById('tip10').addEventListener('click', function() {
-            totalFare = totalFare * 1.10;
-            document.getElementById('fareDisplay').innerText = `Total Fare with Tip: $${totalFare.toFixed(2)}`;
-            disableTipButtons();
-            this.classList.add('clicked');
-        });
-
         document.getElementById('tip15').addEventListener('click', function() {
             totalFare = totalFare * 1.15;
             document.getElementById('fareDisplay').innerText = `Total Fare with Tip: $${totalFare.toFixed(2)}`;
@@ -369,7 +362,14 @@
         });
 
         document.getElementById('tip20').addEventListener('click', function() {
-            totalFare = totalFare * 1.20;
+            totalFare = totalFare * 1.2;
+            document.getElementById('fareDisplay').innerText = `Total Fare with Tip: $${totalFare.toFixed(2)}`;
+            disableTipButtons();
+            this.classList.add('clicked');
+        });
+
+        document.getElementById('tip25').addEventListener('click', function() {
+            totalFare = totalFare * 1.25;
             document.getElementById('fareDisplay').innerText = `Total Fare with Tip: $${totalFare.toFixed(2)}`;
             disableTipButtons();
             this.classList.add('clicked');
