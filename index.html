@@ -3,17 +3,20 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ProRide - Premium Transport Service</title>
+    <title>LuxRide - Premium Transport Service</title>
     <style>
         body {
             font-family: 'Montserrat', sans-serif;
             margin: 0;
             padding: 0;
-            background-color: #1b1b2f; /* Deep dark background */
-            color: #f0f0f0; /* Light text */
+            background-color: #1b1b2f;
+            color: #f0f0f0;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
         }
         header {
-            background-color: #ff4757; /* Bright red for attention */
+            background-color: #ff4757;
             padding: 20px;
             text-align: center;
             color: white;
@@ -23,25 +26,36 @@
             font-size: 3em;
             margin: 0;
         }
+        h2 {
+            font-size: 1.5em;
+            margin: 20px 0 10px;
+            color: #ff4757;
+        }
+        p {
+            margin: 0;
+        }
         main {
             padding: 20px;
+            flex: 1;
             max-width: 1200px;
-            margin: 20px auto;
+            margin: 0 auto;
             display: flex;
             flex-wrap: wrap;
             gap: 20px;
         }
-        .sidebar, .content {
+        .sidebar {
             background-color: #2f2f3e;
             border-radius: 10px;
             padding: 20px;
             box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5);
-        }
-        .sidebar {
             flex: 1;
             max-width: 300px;
         }
         .content {
+            background-color: #2f2f3e;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5);
             flex: 3;
             min-width: 600px;
         }
@@ -54,7 +68,7 @@
             font-weight: bold;
             color: #a1a1b8;
         }
-        input, button, select {
+        input, button, select, textarea {
             padding: 12px;
             margin-bottom: 15px;
             border-radius: 8px;
@@ -62,11 +76,11 @@
             font-size: 16px;
             outline: none;
         }
-        input {
+        input, textarea, select {
             background-color: #3a3a52;
             color: white;
         }
-        input:focus {
+        input:focus, textarea:focus, select:focus {
             outline: none;
             box-shadow: 0 0 10px rgba(255, 71, 87, 0.5);
         }
@@ -79,12 +93,6 @@
         }
         button:hover {
             background-color: #e84118;
-        }
-        #map {
-            height: 400px;
-            width: 100%;
-            border-radius: 10px;
-            margin-top: 20px;
         }
         .fare-summary {
             display: none;
@@ -159,14 +167,52 @@
         .fare-details p {
             margin: 0;
         }
+        .food-options {
+            margin-top: 20px;
+        }
+        .food-options h3 {
+            color: #ff4757;
+        }
+        .food-options label {
+            display: block;
+            margin-bottom: 5px;
+        }
+        .food-options input[type="checkbox"] {
+            margin-right: 10px;
+        }
+        .entertainment-options {
+            margin-top: 20px;
+        }
+        .entertainment-options h3 {
+            color: #ff4757;
+        }
+        .entertainment-options label {
+            display: block;
+            margin-bottom: 5px;
+        }
+        .entertainment-options input[type="checkbox"] {
+            margin-right: 10px;
+        }
+        #map {
+            height: 400px;
+            width: 100%;
+            border-radius: 10px;
+            margin-top: 20px;
+        }
+        footer {
+            background-color: #2f2f3e;
+            padding: 10px;
+            text-align: center;
+            color: #a1a1b8;
+        }
     </style>
     <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBsqYdVFXJcuUpxwkIEPJxEAGN2jlf-tT4&libraries=places"></script>
 </head>
 <body>
 
 <header>
-    <h1>ProRide</h1>
-    <p>Experience luxury and convenience in every ride</p>
+    <h1>LuxRide</h1>
+    <p>Your Premium Transport Experience</p>
 </header>
 
 <main>
@@ -175,67 +221,99 @@
             <img src="https://via.placeholder.com/80" alt="User Profile Picture">
             <div class="info">
                 <h3>John Doe</h3>
-                <p>Pro Member</p>
+                <p>LuxRide Member</p>
             </div>
         </div>
-        <p>Your recent rides:</p>
+        <h2>Your recent rides</h2>
         <ul>
-            <li>Central Park to Times Square</li>
-            <li>Brooklyn to Manhattan</li>
-            <li>JFK Airport to Empire State Building</li>
+            <li>Times Square to Central Park</li>
+            <li>Brooklyn to JFK Airport</li>
+            <li>Wall Street to Empire State Building</li>
         </ul>
     </aside>
 
     <section class="content">
         <div class="multi-step-form">
-            <div class="step active">Step 1: Ride Details</div>
-            <div class="step">Step 2: Select Vehicle</div>
-            <div class="step">Step 3: Payment</div>
+            <div class="step active" id="step1">Step 1: Ride Details</div>
+            <div class="step" id="step2">Step 2: Select Vehicle</div>
+            <div class="step" id="step3">Step 3: Payment</div>
         </div>
 
         <form id="rideDetailsForm">
-            <label for="pickupLocation">Pickup Location</label>
-            <input type="text" id="pickupLocation" name="pickupLocation" placeholder="Enter your pickup location" required>
+            <div id="rideDetails">
+                <label for="pickupLocation">Pickup Location</label>
+                <input type="text" id="pickupLocation" name="pickupLocation" placeholder="Enter your pickup location" required>
 
-            <label for="dropoffLocation">Drop-off Location</label>
-            <input type="text" id="dropoffLocation" name="dropoffLocation" placeholder="Enter your drop-off location" required>
+                <label for="dropoffLocation">Drop-off Location</label>
+                <input type="text" id="dropoffLocation" name="dropoffLocation" placeholder="Enter your drop-off location" required>
 
-            <label for="pickupDate">Pickup Date</label>
-            <input type="date" id="pickupDate" name="pickupDate" required>
+                <label for="pickupDate">Pickup Date</label>
+                <input type="date" id="pickupDate" name="pickupDate" required>
 
-            <label for="pickupTime">Pickup Time</label>
-            <input type="time" id="pickupTime" name="pickupTime" required>
+                <label for="pickupTime">Pickup Time</label>
+                <input type="time" id="pickupTime" name="pickupTime" required>
 
-            <label for="vehicleType">Select Vehicle Type</label>
-            <select id="vehicleType" name="vehicleType">
-                <option value="standard">Standard - $1.50/mile</option>
-                <option value="luxury">Luxury - $3.00/mile</option>
-                <option value="suv">SUV - $2.50/mile</option>
-            </select>
+                <button type="button" onclick="nextStep(2)">Next: Select Vehicle</button>
+            </div>
 
-            <button type="submit">Calculate Fare</button>
+            <div id="vehicleSelection" style="display: none;">
+                <label for="vehicleType">Select Vehicle Type</label>
+                <select id="vehicleType" name="vehicleType">
+                    <option value="standard">Standard - $1.50/mile</option>
+                    <option value="luxury">Luxury - $3.00/mile</option>
+                    <option value="suv">SUV - $2.50/mile</option>
+                </select>
+
+                <div class="food-options">
+                    <h3>Select Free Food & Drinks</h3>
+                    <label><input type="checkbox" name="food" value="Water">Water</label>
+                    <label><input type="checkbox" name="food" value="Chips">Chips</label>
+                    <label><input type="checkbox" name="food" value="Juice">Juice</label>
+                    <label><input type="checkbox" name="food" value="Chocolate">Chocolate</label>
+                </div>
+
+                <div class="entertainment-options">
+                    <h3>Select Entertainment Options</h3>
+                    <label><input type="checkbox" name="entertainment" value="Music">Music</label>
+                    <label><input type="checkbox" name="entertainment" value="Movies">Movies</label>
+                    <label><input type="checkbox" name="entertainment" value="WiFi">WiFi</label>
+                    <label><input type="checkbox" name="entertainment" value="Games">Games</label>
+                </div>
+
+                <button type="button" onclick="nextStep(3)">Next: Payment</button>
+            </div>
+
+            <div id="payment" style="display: none;">
+                <h2>Payment Options</h2>
+                <div class="payment-methods">
+                    <img src="https://via.placeholder.com/50x50.png?text=Zelle" alt="Zelle">
+                    <img src="https://via.placeholder.com/50x50.png?text=Cash" alt="Cash">
+                </div>
+
+                <div class="fare-summary">
+                    <h2>Estimated Fare</h2>
+                    <p id="fareDisplay"></p>
+                    <div class="fare-details">
+                        <p>Base Fare: $5.00</p>
+                        <p id="distanceDisplay"></p>
+                        <p id="timeDisplay"></p>
+                    </div>
+                </div>
+
+                <button type="submit">Complete Booking</button>
+            </div>
         </form>
-
-        <div id="fareSummary" class="fare-summary">
-            <h2>Estimated Fare</h2>
-            <p id="fareDisplay"></p>
-            <div class="fare-details">
-                <p>Base Fare: $5.00</p>
-                <p id="distanceDisplay"></p>
-                <p id="timeDisplay"></p>
-            </div>
-            <div class="payment-methods">
-                <img src="https://via.placeholder.com/50x50.png?text=Visa" alt="Visa">
-                <img src="https://via.placeholder.com/50x50.png?text=MasterCard" alt="MasterCard">
-                <img src="https://via.placeholder.com/50x50.png?text=PayPal" alt="PayPal">
-            </div>
-        </div>
 
         <div id="map"></div>
     </section>
 </main>
 
+<footer>
+    <p>&copy; 2024 LuxRide - Premium Transport Service</p>
+</footer>
+
 <script>
+    let currentStep = 1;
     let map;
     let directionsService;
     let directionsRenderer;
@@ -245,7 +323,7 @@
     function initMap() {
         map = new google.maps.Map(document.getElementById("map"), {
             zoom: 12,
-            center: { lat: 40.7128, lng: -74.0060 }, // New York City
+            center: { lat: 40.7128, lng: -74.0060 },
             styles: [
                 { elementType: 'geometry', stylers: [{ color: '#2f2f3e' }] },
                 { elementType: 'labels.text.stroke', stylers: [{ color: '#2f2f3e' }] },
@@ -300,8 +378,19 @@
         });
     }
 
-    document.getElementById('rideDetailsForm').addEventListener('submit', function (event) {
-        event.preventDefault();
+    function nextStep(step) {
+        document.getElementById(`step${currentStep}`).classList.remove('active');
+        document.getElementById(`step${step}`).classList.add('active');
+        document.getElementById(`step${currentStep}`).style.display = 'none';
+        document.getElementById(`step${step}`).style.display = 'block';
+        currentStep = step;
+
+        if (step === 3) {
+            calculateFare();
+        }
+    }
+
+    function calculateFare() {
         if (!pickupCoords || !dropoffCoords) {
             alert("Please select valid pickup and drop-off locations.");
             return;
@@ -310,7 +399,7 @@
         const pickupLocation = document.getElementById('pickupLocation').value;
         const dropoffLocation = document.getElementById('dropoffLocation').value;
         const vehicleType = document.getElementById('vehicleType').value;
-        let costPerMile = 1.50; // Default to standard
+        let costPerMile = 1.50;
 
         if (vehicleType === "luxury") {
             costPerMile = 3.00;
@@ -326,20 +415,20 @@
             if (status === google.maps.DirectionsStatus.OK) {
                 directionsRenderer.setDirections(response);
 
-                const distance = response.routes[0].legs[0].distance.value / 1609.34; // Convert meters to miles
+                const distance = response.routes[0].legs[0].distance.value / 1609.34;
                 const duration = response.routes[0].legs[0].duration.text;
-                const baseFare = 5.00; // Base fare
+                const baseFare = 5.00;
                 const totalFare = baseFare + (distance * costPerMile);
 
                 document.getElementById('fareDisplay').innerText = `Total Fare: $${totalFare.toFixed(2)} for ${distance.toFixed(2)} miles`;
                 document.getElementById('distanceDisplay').innerText = `Distance: ${distance.toFixed(2)} miles`;
                 document.getElementById('timeDisplay').innerText = `Estimated Time: ${duration}`;
-                document.getElementById('fareSummary').style.display = 'block';
+                document.querySelector('.fare-summary').style.display = 'block';
             } else {
                 alert("Could not calculate the route. Please try again.");
             }
         });
-    });
+    }
 
     window.onload = initMap;
 </script>
