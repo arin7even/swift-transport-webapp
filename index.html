@@ -130,7 +130,53 @@
             font-size: 0.9em;
         }
     </style>
-    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBsqYdVFXJcuUpxwkIEPJxEAGN2jlf-tT4&libraries=places"></script>
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBsqYdVFXJcuUpxwkIEPJxEAGN2jlf-tT4&libraries=places"> 
+    function showAlertMessage() {
+        alert("Rides are only available from 4 PM to 1 AM. You need to reserve at least 1 hour before your pickup time.");
+    }
+
+    function validatePickupTime() {
+        const pickupDate = document.getElementById('pickupDate').value;
+        const pickupTime = document.getElementById('pickupTime').value;
+        const pickupDateTime = new Date(`${pickupDate}T${pickupTime}`);
+        const now = new Date();
+
+        const hoursUntilPickup = (pickupDateTime - now) / (1000 * 60 * 60);
+
+        if (pickupDateTime < now) {
+            alert("Pickup time cannot be in the past.");
+            return false;
+        }
+
+        if (hoursUntilPickup < 1) {
+            alert("You must reserve your ride at least 1 hour in advance.");
+            return false;
+        }
+
+        const pickupHour = pickupDateTime.getHours();
+        if (pickupHour < 16 && pickupHour >= 1) {
+            alert("Rides are only available between 4 PM and 1 AM.");
+            return false;
+        }
+
+        return true;
+    }
+
+    document.getElementById('confirmInfoBtn').addEventListener('click', function(event) {
+        event.preventDefault();
+
+        if (!validatePickupTime()) {
+            return;
+        }
+
+        // Existing code to handle form submission
+    });
+
+    window.onload = function() {
+        initMap();
+        showAlertMessage();
+    };
+    </script>
 </head>
 <body>
     <h1>Book Your Ride</h1>
