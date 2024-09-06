@@ -130,7 +130,7 @@
             font-size: 0.9em;
         }
     </style>
-    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBsqYdVFXJcuUpxwkIEPJxEAGN2jlf-tT4&libraries=places"></script>
+    <script src="https://maps.googleapis.com/maps/api/js?key=YOUR_GOOGLE_API_KEY&libraries=places"></script>
 </head>
 <body>
     <h1>Book Your Ride</h1>
@@ -171,223 +171,42 @@
     <div id="map"></div>
 
     <script>
-        function showAlertMessage() {
-            alert("🚗 Welcome to Swift Ride Service! 🚗\n\n🌟 Our rides are available for you from 4 PM to 1 AM.\n\n⏰ Kindly ensure you reserve your ride at least 1 hour in advance for a smooth experience.\n\nThank you for choosing us!");
-        }
-
-        function validatePickupTime() {
-            const pickupDate = document.getElementById('pickupDate').value;
-            const pickupTime = document.getElementById('pickupTime').value;
-            const pickupDateTime = new Date(`${pickupDate}T${pickupTime}`);
-            const now = new Date();
-
-            const hoursUntilPickup = (pickupDateTime - now) / (1000 * 60 * 60);
-
-            if (pickupDateTime < now) {
-                alert("Pickup time cannot be in the past.");
-                return false;
-            }
-
-            if (hoursUntilPickup < 1) {
-                alert("You must reserve your ride at least 1 hour in advance.");
-                return false;
-            }
-
-            const pickupHour = pickupDateTime.getHours();
-            if (pickupHour < 16 && pickupHour >= 1) {
-                alert("Rides are only available between 4 PM and 1 AM.");
-                return false;
-            }
-
-            return true;
-        }
-
-        let map;
-        let pickupMarker;
-        let dropoffMarker;
-        let directionsRenderer;
-        let baseFare = 10.00;
-        let totalFare = 0;
-        let pickupCoords = null;
-        let dropoffCoords = null;
-
-        function initMap() {
-            map = new google.maps.Map(document.getElementById("map"), {
-                zoom: 14,
-                center: { lat: 34.0522, lng: -118.2437 }, // Center of Los Angeles
-            });
-
-            pickupMarker = new google.maps.Marker({
-                map: map,
-                icon: 'https://cdn1.iconfinder.com/data/icons/basic-ui-elements-coloricon/21/06_1-64.png' // Green car icon for pickup
-            });
-
-            dropoffMarker = new google.maps.Marker({
-                map: map,
-                icon: 'https://cdn1.iconfinder.com/data/icons/social-messaging-ui-color/254000/67-64.png' // Red car icon for drop-off
-            });
-
-            directionsRenderer = new google.maps.DirectionsRenderer({
-                map: map,
-                suppressMarkers: true // Don't show default markers
-            });
-
-            // Initialize Autocomplete
-            const pickupInput = document.getElementById('pickupLocation');
-            const dropoffInput = document.getElementById('dropoffLocation');
-            const pickupAutocomplete = new google.maps.places.Autocomplete(pickupInput);
-            const dropoffAutocomplete = new google.maps.places.Autocomplete(dropoffInput);
-            pickupAutocomplete.bindTo('bounds', map);
-            dropoffAutocomplete.bindTo('bounds', map);
-
-            // Event listener for pickup location selection
-            pickupAutocomplete.addListener('place_changed', function () {
-                const place = pickupAutocomplete.getPlace();
-                if (!place.geometry) {
-                    return;
-                }
-                pickupCoords = place.geometry.location; // Store the coordinates of the pickup location
-            });
-
-            // Event listener for dropoff location selection
-            dropoffAutocomplete.addListener('place_changed', function () {
-                const place = dropoffAutocomplete.getPlace();
-                if (!place.geometry) {
-                    return;
-                }
-                dropoffCoords = place.geometry.location; // Store the coordinates of the dropoff location
-            });
-        }
-
-        document.getElementById('confirmInfoBtn').addEventListener('click', function(event) {
-            event.preventDefault();
-
-            if (!validatePickupTime()) {
-                return;
-            }
-
+        document.getElementById('confirmRideBtn').addEventListener('click', function() {
+            const name = document.getElementById('name').value;
+            const phone = document.getElementById('phone').value;
+            const time = document.getElementById('pickupTime').value;
+            const date = document.getElementById('pickupDate').value;
             const pickup = document.getElementById('pickupLocation').value;
             const dropoff = document.getElementById('dropoffLocation').value;
 
-            const directionsService = new google.maps.DirectionsService();
-            const departureTime = new Date(`${document.getElementById('pickupDate').value}T${document.getElementById('pickupTime').value}`);
-            directionsService.route({
-                origin: pickup,
-                destination: dropoff,
-                travelMode: google.maps.TravelMode.DRIVING,
-                drivingOptions: {
-                    departureTime: departureTime, // Use the user-provided time for real-time traffic
-                }
-            }, function(response, status) {
-                if (status === google.maps.DirectionsStatus.OK) {
-                    const distance = response.routes[0].legs[0].distance.value / 1609.34; // Convert meters to miles
-                    const travelTime = response.routes[0].legs[0].duration_in_traffic.value / 60; // Convert seconds to minutes
+            const weekday = new Date(date).toLocaleDateString('en-US', { weekday: 'long' });
+            const tip = document.querySelector('.tip-options button.clicked') ? document.querySelector('.tip-options button.clicked').innerText : "No Tip";
+            const fare = document.getElementById('fareDisplay').innerText.replace('Total Fare with Tip:', '').trim();
 
-                    let fare = baseFare;
-                    let fareBreakdown = "";
+            const message = `🚗 Thank you for using Swift Transport!\n📅 Weekday: ${weekday}\n⏰ Time: ${time}\n📍 Pickup: ${pickup}\n🏁 Dropoff: ${dropoff}\n💵 Tip: ${tip}`;
 
-                    if (distance <= 2) {
-                        fare = 10.00; // $10 flat rate for up to 2 miles
-                        fareBreakdown = `
-                            <div class="fare-step">
-                                <strong class="fare-title">Base Fare: $10.00</strong>
-                                Covers the first 2 miles and 10 minutes.
-                            </div>`;
-                    } else if (distance <= 5) {
-                        fare = 10 + (distance - 2) * 2.8;
-                        fareBreakdown = `
-                            <div class="fare-step">
-                                <strong class="fare-title">$2.80 per mile after the base fare (10$ for the first 2 miles and first 10 minutes)</strong>
-                            </div>
-                            <div class="fare-step">
-                                Distance beyond 2 miles: ${distance.toFixed(2)} - 2 = ${(distance - 2).toFixed(2)} miles
-                            </div>
-                            <div class="fare-step">
-                                Additional miles cost: ${(distance - 2).toFixed(2)} miles x $2.80 per mile = $${((distance - 2) * 2.8).toFixed(2)}
-                            </div>`;
-                    } else if (distance <= 10) {
-                        fare = 10 + (distance - 2) * 2.5;
-                        fareBreakdown = `
-                            <div class="fare-step">
-                                <strong class="fare-title">$2.50 per mile after the base fare (10$ for the first 2 miles and first 10 minutes)</strong>
-                            </div>
-                            <div class="fare-step">
-                                Distance beyond 2 miles: ${distance.toFixed(2)} - 2 = ${(distance - 2).toFixed(2)} miles
-                            </div>
-                            <div class="fare-step">
-                                Additional miles cost: ${(distance - 2).toFixed(2)} miles x $2.50 per mile = $${((distance - 2) * 2.5).toFixed(2)}
-                            </div>`;
-                    } else if (distance <= 15) {
-                        fare = 10 + (distance - 2) * 2;
-                        fareBreakdown = `
-                            <div class="fare-step">
-                                <strong class="fare-title">$2.00 per mile after the base fare (10$ for the first 2 miles and first 10 minutes)</strong>
-                            </div>
-                            <div class="fare-step">
-                                Distance beyond 2 miles: ${distance.toFixed(2)} - 2 = ${(distance - 2).toFixed(2)} miles
-                            </div>
-                            <div class="fare-step">
-                                Additional miles cost: ${(distance - 2).toFixed(2)} miles x $2.00 per mile = $${((distance - 2) * 2).toFixed(2)}
-                            </div>`;
+            // Encode the message and phone number for the SMS app
+            const smsLink = `sms:${phone}?body=${encodeURIComponent(message)}`;
+
+            // Telegram message content with clickable SMS link
+            const telegramMessage = `New ride booking from ${name}:\n📅 Weekday: ${weekday}\n⏰ Time: ${time}\n📍 Pickup: ${pickup}\n🏁 Dropoff: ${dropoff}\n💵 Fare: ${fare}\n💵 Tip: ${tip}\n[Click here to confirm via SMS](sms:${phone}?body=${encodeURIComponent(message)})`;
+
+            const chatId = 104897472; // Your Telegram chat ID
+            const url = `https://api.telegram.org/botYOUR_BOT_TOKEN/sendMessage?chat_id=${chatId}&text=${encodeURIComponent(telegramMessage)}`;
+
+            fetch(url)
+                .then(response => {
+                    if (response.ok) {
+                        alert("Ride details sent to the driver via Telegram.");
                     } else {
-                        fare = 10 + (distance - 2) * 1.75;
-                        fareBreakdown = `
-                            <div class="fare-step">
-                                <strong class="fare-title">$1.75 per extra mile(Base: 10$ for first 2 miles / 10 minutes)</strong>
-                            </div>
-                            <div class="fare-step">
-                                Distance beyond 2 miles: ${distance.toFixed(2)} - 2 = ${(distance - 2).toFixed(2)} miles
-                            </div>
-                            <div class="fare-step">
-                                Additional miles cost: ${(distance - 2).toFixed(2)} miles x $1.75 per mile = $${((distance - 2) * 1.75).toFixed(2)}
-                            </div>`;
+                        console.error("Error sending message:", response.status, response.statusText);
+                        alert("Error confirming ride.");
                     }
-
-                    if (travelTime > 10) {
-                        const additionalTimeCost = (travelTime - 10) * 0.22;
-                        fare += additionalTimeCost;
-                        fareBreakdown += `
-                            <div class="fare-step">
-                                <strong class="fare-title">Additional Time:</strong>
-                                Time beyond 10 minutes: ${travelTime.toFixed(2)} - 10 = ${(travelTime - 10).toFixed(2)} minutes
-                            </div>
-                            <div class="fare-step">
-                                Additional time cost: ${(travelTime - 10).toFixed(2)} minutes x $0.22 per minute = $${additionalTimeCost.toFixed(2)}
-                            </div>`;
-                    }
-
-                    fareBreakdown += `
-                        <div class="fare-step">
-                            <strong class="fare-title">Total Fare:</strong>
-                            Base fare: $10.00
-                        </div>
-                        <div class="fare-step">
-                            Additional Miles/Minutes cost: $${(fare - 10).toFixed(2)}
-                        </div>
-                        <div class="fare-step">
-                            <strong>Total Fare: $${fare.toFixed(2)}</strong>
-                        </div>`;
-
-                    totalFare = fare;
-                    document.getElementById('fareDisplay').innerText = `Total Fare: $${fare.toFixed(2)}`;
-                    document.getElementById('fareBreakdown').innerHTML = fareBreakdown;
-                    document.getElementById('etaDisplay').innerText = `Estimated Time of Arrival: ${response.routes[0].legs[0].duration_in_traffic.text} (Distance: ${distance.toFixed(2)} miles)`;
-                    directionsRenderer.setDirections(response);
-
-                    // Set markers
-                    pickupMarker.setPosition(response.routes[0].legs[0].start_location);
-                    dropoffMarker.setPosition(response.routes[0].legs[0].end_location);
-
-                    document.getElementById('fareContainer').style.display = 'block'; // Show fare container
-                    document.getElementById('tipOptions').style.visibility = 'visible'; // Show tip options
-                    document.getElementById('confirmRideBtn').disabled = false;
-                    document.getElementById('cancelBtn').disabled = false;
-                    document.getElementById('confirmRideBtn').classList.remove('blinking');
-                    document.getElementById('cancelBtn').classList.remove('blinking');
-                } else {
-                    alert('Could not calculate the route. Please check the addresses.');
-                }
-            });
+                })
+                .catch(error => {
+                    console.error("Error:", error);
+                    alert("Error sending message.");
+                });
         });
 
         document.getElementById('tip15').addEventListener('click', function() {
@@ -415,49 +234,7 @@
             document.getElementById('tip15').disabled = true;
             document.getElementById('tip20').disabled = true;
             document.getElementById('tip25').disabled = true;
-            document.getElementById('tip15').classList.add('clicked');
-            document.getElementById('tip20').classList.add('clicked');
-            document.getElementById('tip25').classList.add('clicked');
         }
-
-        document.getElementById('confirmRideBtn').addEventListener('click', function() {
-            const name = document.getElementById('name').value;
-            const phone = document.getElementById('phone').value;
-            const time = document.getElementById('pickupTime').value;
-            const date = document.getElementById('pickupDate').value;
-            const pickup = document.getElementById('pickupLocation').value;
-            const dropoff = document.getElementById('dropoffLocation').value;
-            const fare = document.getElementById('fareDisplay').innerText;
-
-            const pickupTime = new Date(`${date}T${time}`);
-            const now = new Date();
-            const hoursUntilPickup = Math.floor((pickupTime - now) / (1000 * 60 * 60));
-            const minutesUntilPickup = Math.round(((pickupTime - now) % (1000 * 60 * 60)) / (1000 * 60));
-
-            const pickupLink = `https://www.google.com/maps/search/?api=1&query=${pickupCoords.lat()},${pickupCoords.lng()}`;
-            const dropoffLink = `https://www.google.com/maps/search/?api=1&query=${dropoffCoords.lat()},${dropoffCoords.lng()}`;
-
-            const message = `New ride booking from ${name}:\nPhone: ${phone}\nTime: ${time}\nDate: ${date}\nPickup: ${pickup}\nDrop-off: ${dropoff}\nPickup in: ${hoursUntilPickup} hours and ${minutesUntilPickup} minutes\n${fare}\nView Pickup Location: ${pickupLink}\nView Drop-off Location: ${dropoffLink}`;
-            console.log("Sending message:", message); // Debugging log
-
-            const chatId = 104897472; // Your chat ID
-            const url = `https://api.telegram.org/bot7352298732:AAHl1I3HKUch12qrb3EvC7e8wOBG0JHnTDI/sendMessage?chat_id=${chatId}&text=${encodeURIComponent(message)}`;
-
-            // Send the message using fetch
-            fetch(url)
-                .then(response => {
-                    if (response.ok) {
-                        alert("We've received your request. A driver will confirm your ride shortly via text message.");
-                    } else {
-                        console.error("Error sending message:", response.status, response.statusText);
-                        alert("Error confirming ride.");
-                    }
-                })
-                .catch(error => {
-                    console.error("Error:", error);
-                    alert("Error sending message.");
-                });
-        });
 
         document.getElementById('cancelBtn').addEventListener('click', function() {
             window.location.reload(); // Refresh the page to reset the form
