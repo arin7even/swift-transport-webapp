@@ -9,8 +9,8 @@
             font-family: 'Arial', sans-serif;
             margin: 0;
             padding: 20px;
-            background-color: #2c2c2c;
-            color: #fff;
+            background-color: #2c2c2c; /* Dark mode background */
+            color: #fff; /* Light text for better contrast */
         }
         h1 {
             color: #fff;
@@ -20,70 +20,66 @@
             display: flex;
             flex-direction: column;
             max-width: 500px;
-            margin: 0 auto;
+            margin: 0 auto; /* Center form on the page */
             padding: 20px;
             border-radius: 8px;
-            background-color: #3a3a3a;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            background-color: #3a3a3a; /* Darker background for form */
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Shadow effect */
         }
-        .input-group {
-            display: flex;
-            align-items: center;
-            margin-bottom: 10px;
-        }
-        .input-group span {
-            margin-right: 10px;
-            font-size: 20px;
+        label {
+            margin-bottom: 5px;
         }
         input, button {
-            width: 100%;
+            margin: 10px 0;
             padding: 10px;
             font-size: 16px;
             border-radius: 4px;
-            border: 1px solid #555;
-            transition: border-color 0.3s, box-shadow 0.3s;
-            margin-bottom: 15px;
+            border: 1px solid #555; /* Border color */
+            transition: border-color 0.3s, box-shadow 0.3s; /* Smooth transition */
         }
         input:focus {
-            border-color: #80ff72;
-            box-shadow: 0 0 5px rgba(128, 255, 114, 0.5);
+            border-color: #80ff72; /* Light green border on focus */
+            box-shadow: 0 0 5px rgba(128, 255, 114, 0.5); /* Shadow on focus */
         }
         button {
-            background-color: #007bff;
             color: white;
             border: none;
             cursor: pointer;
-            transition: background-color 0.3s;
+            transition: background-color 0.3s; /* Smooth transition */
         }
         button:disabled {
-            background-color: #6c757d;
+            background-color: #6c757d; /* Grey color when disabled */
             cursor: not-allowed;
         }
         button:hover:enabled {
-            background-color: #0056b3;
+            background-color: #0056b3; /* Darker blue on hover */
+        }
+        #confirmRideBtn:enabled {
+            background-color: green;
+        }
+        #cancelBtn:enabled {
+            background-color: red;
         }
         .blinking {
-            background-color: #6c757d;
+            background-color: #6c757d; /* Grey button */
             color: white;
             animation: blink 1s step-start 0s infinite;
         }
         @keyframes blink {
             50% { background-color: #007bff; }
         }
+        #pickupLocation {
+            background-color: #80ff72; /* Restore original light green background for pickup */
+            color: #333; /* Dark text for readability */
+        }
+        #dropoffLocation {
+            background-color: #ff7f7f; /* Restore original light red background for drop-off */
+            color: #333; /* Dark text for readability */
+        }
         #map {
             height: 400px;
             width: 100%;
             margin-top: 20px;
-        }
-        .fare-container {
-            border: 2px solid #007bff;
-            padding: 10px;
-            border-radius: 8px;
-            margin-top: 20px;
-        }
-        .fare-title {
-            font-weight: bold;
-            color: #80ff72;
         }
         .eta {
             margin-bottom: 20px;
@@ -93,7 +89,21 @@
             padding: 10px;
             border-radius: 4px;
             text-align: center;
+            color: #80ff72; /* Green text for ETA display */
+        }
+        .fare-container {
+            border: 2px solid #007bff; /* Blue frame around fare breakdown */
+            padding: 10px;
+            border-radius: 8px;
+            margin-top: 20px;
+        }
+        .fare-title {
+            font-weight: bold;
             color: #80ff72;
+            margin-top: 10px;
+        }
+        .fare-step {
+            margin-top: 5px;
         }
         .tip-options {
             display: flex;
@@ -118,6 +128,14 @@
         small {
             color: #80ff72;
             font-size: 0.9em;
+        }
+        .input-group {
+            display: flex;
+            align-items: center;
+        }
+        .input-group span {
+            margin-right: 10px;
+            font-size: 18px;
         }
     </style>
     <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBsqYdVFXJcuUpxwkIEPJxEAGN2jlf-tT4&libraries=places"></script>
@@ -162,7 +180,6 @@
         <input type="text" id="dropoffLocation" name="dropoffLocation" required>
 
         <button type="submit" id="confirmInfoBtn" class="blinking">Confirm Info</button>
-
         <div id="fareContainer" class="fare-container" style="display: none;">
             <div id="fareDisplay" class="fare"></div>
             <div id="fareBreakdown" class="fare-description"></div>
@@ -180,7 +197,10 @@
     <div id="map"></div>
 
     <script>
-        let map, pickupCoords, dropoffCoords;
+        let map, pickupMarker, dropoffMarker, directionsRenderer;
+        let pickupCoords = null;
+        let dropoffCoords = null;
+        let totalFare = 10.00; // Base fare
 
         function initMap() {
             map = new google.maps.Map(document.getElementById("map"), {
@@ -188,20 +208,43 @@
                 center: { lat: 34.0522, lng: -118.2437 }, // Los Angeles
             });
 
-            const pickupInput = document.getElementById('pickupLocation');
-            const dropoffInput = document.getElementById('dropoffLocation');
-
-            const pickupAutocomplete = new google.maps.places.Autocomplete(pickupInput);
-            const dropoffAutocomplete = new google.maps.places.Autocomplete(dropoffInput);
-
-            pickupAutocomplete.addListener('place_changed', () => {
-                const place = pickupAutocomplete.getPlace();
-                pickupCoords = place.geometry.location;
+            pickupMarker = new google.maps.Marker({
+                map: map,
+                icon: 'https://cdn1.iconfinder.com/data/icons/basic-ui-elements-coloricon/21/06_1-64.png' // Green car icon for pickup
             });
 
-            dropoffAutocomplete.addListener('place_changed', () => {
+            dropoffMarker = new google.maps.Marker({
+                map: map,
+                icon: 'https://cdn1.iconfinder.com/data/icons/social-messaging-ui-color/254000/67-64.png' // Red car icon for drop-off
+            });
+
+            directionsRenderer = new google.maps.DirectionsRenderer({
+                map: map,
+                suppressMarkers: true // Custom markers
+            });
+
+            // Initialize Autocomplete
+            const pickupInput = document.getElementById('pickupLocation');
+            const dropoffInput = document.getElementById('dropoffLocation');
+            const pickupAutocomplete = new google.maps.places.Autocomplete(pickupInput);
+            const dropoffAutocomplete = new google.maps.places.Autocomplete(dropoffInput);
+            pickupAutocomplete.bindTo('bounds', map);
+            dropoffAutocomplete.bindTo('bounds', map);
+
+            // Event listener for pickup location selection
+            pickupAutocomplete.addListener('place_changed', function () {
+                const place = pickupAutocomplete.getPlace();
+                if (!place.geometry) return;
+                pickupCoords = place.geometry.location;
+                pickupMarker.setPosition(pickupCoords); // Set pickup marker
+            });
+
+            // Event listener for dropoff location selection
+            dropoffAutocomplete.addListener('place_changed', function () {
                 const place = dropoffAutocomplete.getPlace();
+                if (!place.geometry) return;
                 dropoffCoords = place.geometry.location;
+                dropoffMarker.setPosition(dropoffCoords); // Set dropoff marker
             });
         }
 
@@ -223,7 +266,7 @@
             const pickupLink = `https://www.google.com/maps/search/?api=1&query=${pickupCoords.lat()},${pickupCoords.lng()}`;
             const dropoffLink = `https://www.google.com/maps/search/?api=1&query=${dropoffCoords.lat()},${dropoffCoords.lng()}`;
 
-            const fare = "Fare amount will go here"; // Placeholder until fare calculation is added.
+            const fare = "Fare amount will go here"; // Placeholder for fare calculation
 
             const message = `🚗 New ride booking from ${name}:
 📞 Phone: ${phone}
