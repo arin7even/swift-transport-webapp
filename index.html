@@ -129,33 +129,39 @@
             color: #80ff72; /* Light green color for small text */
             font-size: 0.9em;
         }
+        #shareSection {
+            text-align: center;
+            margin-top: 30px;
+        }
+        #shareSMSBtn {
+            background-color: #007bff;
+            margin-top: 10px;
+            padding: 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            color: white;
+        }
     </style>
     <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBsqYdVFXJcuUpxwkIEPJxEAGN2jlf-tT4&libraries=places"></script>
 </head>
 <body>
     <h1>Book Your Ride</h1>
     <form id="bookingForm">
-        <span>👽</span>
         <label for="name">Your Name:</label>
         <input type="text" id="name" name="name" required>
 
-        <span>📞</span>
         <label for="phone">Phone Number:<small>(Needed for further confirmations from the driver)</small></label>
         <input type="text" id="phone" name="phone" required>
-        
-        <span>🕒</span>
+
         <label for="pickupTime">Pickup Time (HH:MM):</label>
         <input type="time" id="pickupTime" name="pickupTime" required>
-        
-        <span>📆</span>
+
         <label for="pickupDate">Pickup Date:</label>
         <input type="date" id="pickupDate" name="pickupDate" required>
-        
-        <span>✅</span>
+
         <label for="pickupLocation">Pickup Location:</label>
         <input type="text" id="pickupLocation" name="pickupLocation" required>
-        
-        <span>🟥</span>
+
         <label for="dropoffLocation">Drop-off Location:</label>
         <input type="text" id="dropoffLocation" name="dropoffLocation" required>
 
@@ -176,9 +182,15 @@
     <div class="eta" id="etaDisplay"></div>
     <div id="map"></div>
 
+    <!-- New section for sharing the service via SMS -->
+    <div id="shareSection">
+        <h2>If you like our service and prices, we kindly appreciate if you refer it to a friend!</h2>
+        <button id="shareSMSBtn">Share via SMS</button>
+    </div>
+
     <script>
         function showAlertMessage() {
-            alert("             🚖 Welcome to Swift Ride Service! 🚖\n\n🌟  Operating Hours: \n\n  5 AM to 7 AM \n\n  4 PM to 12 AM \n\n⏳ Kindly ensure you reserve the ride at least 1 hour in advance for a smooth experience.\n\nThank you for choosing Swift Ride — we look forward to getting you where you need to go! 🚙💨")
+            alert("Rides are only available from 4 PM to 1 AM. You need to reserve at least 1 hour before your pickup time.");
         }
 
         function validatePickupTime() {
@@ -443,17 +455,7 @@
             const pickupLink = `https://www.google.com/maps/search/?api=1&query=${pickupCoords.lat()},${pickupCoords.lng()}`;
             const dropoffLink = `https://www.google.com/maps/search/?api=1&query=${dropoffCoords.lat()},${dropoffCoords.lng()}`;
 
-            const message = `🚗 New ride booking from ${name}:
-📞 Phone: ${phone}
-⏰ Time: ${time}
-📅 Date: ${date}
-📍 Pickup: ${pickup}
-🏁 Drop-off: ${dropoff}
-⏳ Pickup in: ${hoursUntilPickup} hours and ${minutesUntilPickup} minutes
-💵 Fare: ${fare}
-🔗 View Pickup Location: ${pickupLink}
-🔗 View Drop-off Location: ${dropoffLink}`;
-
+            const message = `New ride booking from ${name}:\nPhone: ${phone}\nTime: ${time}\nDate: ${date}\nPickup: ${pickup}\nDrop-off: ${dropoff}\nPickup in: ${hoursUntilPickup} hours and ${minutesUntilPickup} minutes\n${fare}\nView Pickup Location: ${pickupLink}\nView Drop-off Location: ${dropoffLink}`;
             console.log("Sending message:", message); // Debugging log
 
             const chatId = 104897472; // Your chat ID
@@ -483,6 +485,13 @@
             initMap();
             showAlertMessage();
         };
+
+        // SMS sharing functionality
+        document.getElementById('shareSMSBtn').addEventListener('click', function() {
+            const smsMessage = "Hey! Check out Swift Ride, I think you'll love their service! Here's the link: https://arin7even.github.io/swift-transport-webapp/";
+            const smsLink = `sms:?body=${encodeURIComponent(smsMessage)}`;
+            window.location.href = smsLink; // Open native SMS app with pre-filled message
+        });
     </script>
 </body>
 </html>
