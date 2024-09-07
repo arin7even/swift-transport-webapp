@@ -238,6 +238,7 @@
                 suppressMarkers: true // Don't show default markers
             });
 
+            // Initialize Autocomplete
             const pickupInput = document.getElementById('pickupLocation');
             const dropoffInput = document.getElementById('dropoffLocation');
             const pickupAutocomplete = new google.maps.places.Autocomplete(pickupInput);
@@ -245,20 +246,22 @@
             pickupAutocomplete.bindTo('bounds', map);
             dropoffAutocomplete.bindTo('bounds', map);
 
+            // Event listener for pickup location selection
             pickupAutocomplete.addListener('place_changed', function () {
                 const place = pickupAutocomplete.getPlace();
                 if (!place.geometry) {
                     return;
                 }
-                pickupCoords = place.geometry.location;
+                pickupCoords = place.geometry.location; // Store the coordinates of the pickup location
             });
 
+            // Event listener for dropoff location selection
             dropoffAutocomplete.addListener('place_changed', function () {
                 const place = dropoffAutocomplete.getPlace();
                 if (!place.geometry) {
                     return;
                 }
-                dropoffCoords = place.geometry.location;
+                dropoffCoords = place.geometry.location; // Store the coordinates of the dropoff location
             });
         }
 
@@ -279,18 +282,18 @@
                 destination: dropoff,
                 travelMode: google.maps.TravelMode.DRIVING,
                 drivingOptions: {
-                    departureTime: departureTime,
+                    departureTime: departureTime, // Use the user-provided time for real-time traffic
                 }
             }, function(response, status) {
                 if (status === google.maps.DirectionsStatus.OK) {
-                    const distance = response.routes[0].legs[0].distance.value / 1609.34;
-                    const travelTime = response.routes[0].legs[0].duration_in_traffic.value / 60;
+                    const distance = response.routes[0].legs[0].distance.value / 1609.34; // Convert meters to miles
+                    const travelTime = response.routes[0].legs[0].duration_in_traffic.value / 60; // Convert seconds to minutes
 
                     let fare = baseFare;
                     let fareBreakdown = "";
 
                     if (distance <= 2) {
-                        fare = 10.00;
+                        fare = 10.00; // $10 flat rate for up to 2 miles
                         fareBreakdown = `
                             <div class="fare-step">
                                 <strong class="fare-title">Base Fare: $10.00</strong>
@@ -391,6 +394,85 @@
                     alert('Could not calculate the route. Please check the addresses.');
                 }
             });
+        });
+
+        document.getElementById('tip15').addEventListener('click', function() {
+            totalFare = totalFare * 1.15;
+            document.getElementById('fareDisplay').innerText = `Total Fare with Tip: $${totalFare.toFixed(2)}`;
+            disableTipButtons();
+            this.classList.add('clicked');
+        });
+
+        document.getElementById('tip20').addEventListener('click', function() {
+            totalFare = totalFare * 1.20;
+            document.getElementById('fareDisplay').innerText = `Total Fare with Tip: $${totalFare.toFixed(2)}`;
+            disableTipButtons();
+            this.classList.add('clicked');
+        });
+
+        document.getElementById('tip25').addEventListener('click', function() {
+            totalFare = totalFare * 1.25;
+            document.getElementById('fareDisplay').innerText = `Total Fare with Tip: $${totalFare.toFixed(2)}`;
+            disableTipButtons();
+            this.classList.add('clicked');
+        });
+
+        function disableTipButtons() {
+            document.getElementById('tip15').disabled = true;
+            document.getElementById('tip20').disabled = true;
+            document.getElementById('tip25').disabled = true;
+            document.getElementById('tip15').classList.add('clicked');
+            document.getElementById('tip20').classList.add('clicked');
+            document.getElementById('tip25').classList.add('clicked');
+        }
+
+        document.getElementById('confirmRideBtn').addEventListener('click', function() {
+            const name = document.getElementById('name').value;
+            const phone = document.getElementById('phone').value;
+            const time = document.getElementById('pickupTime').value;
+            const date = document.getElementById('pickupDate').value;
+            const pickup = document.getElementById('pickupLocation').value;
+            const dropoff = document.getElementById('dropoffLocation').value;
+            const fare = document.getElementById('fareDisplay').innerText;
+
+            const pickupTime = new Date(`${date}T${time}`);
+            const now = new Date();
+            const hoursUntilPickup = Math.floor((pickupTime - now) / (1000 * 60 * 60));
+            const minutesUntilPickup = Math.round(((pickupTime - now) % (1000 * 60 * 60)) / (1000 * 60));
+
+            const pickupLink = `https://www.google.com/maps/search/?api=1&query=${pickupCoords.lat()},${pickupCoords.lng()}`;
+            const dropoffLink = `https://www.google.com/maps/search/?api=1&query=${dropoffCoords.lat()},${dropoffCoords.lng()}`;
+
+            const message = `🚗 New ride booking from ${name}:
+📞 Phone: ${phone}
+⏰ Time: ${time}
+📅 Date: ${date}
+📍 Pickup: ${pickup}
+🏁 Drop-off: ${dropoff}
+⏳ Pickup in: ${hoursUntilPickup} hours and ${minutesUntilPickup} minutes
+💵 Fare: ${fare}
+🔗 View Pickup Location: ${pickupLink}
+🔗 View Drop-off Location: ${dropoffLink}`;
+
+            console.log("Sending message:", message); // Debugging log
+
+            const chatId = 104897472; // Your chat ID
+            const url = `https://api.telegram.org/bot7352298732:AAHl1I3HKUch12qrb3EvC7e8wOBG0JHnTDI/sendMessage?chat_id=${chatId}&text=${encodeURIComponent(message)}`;
+
+            // Send the message using fetch
+            fetch(url)
+                .then(response => {
+                    if (response.ok) {
+                        alert("We've received your request. A driver will confirm your ride shortly via text message.");
+                    } else {
+                        console.error("Error sending message:", response.status, response.statusText);
+                        alert("Error confirming ride.");
+                    }
+                })
+                .catch(error => {
+                    console.error("Error:", error);
+                    alert("Error sending message.");
+                });
         });
 
         // SMS functionality
