@@ -190,7 +190,7 @@
 
     <script>
         function showAlertMessage() {
-            alert("Rides are only available from 4 PM to 1 AM. You need to reserve at least 1 hour before your pickup time.");
+            alert("             🚖 Welcome to Swift Ride Service! 🚖\n\n🌟  Operating Hours: \n\n  5 AM to 7 AM \n\n  4 PM to 12 AM \n\n⏳ Kindly ensure you reserve the ride at least 1 hour in advance for a smooth experience.\n\nThank you for choosing Swift Ride — we look forward to getting you where you need to go! 🚙💨")
         }
 
         function validatePickupTime() {
@@ -212,10 +212,10 @@
             }
 
             const pickupHour = pickupDateTime.getHours();
-            if (pickupHour < 16 && pickupHour >= 1) {
-                alert("Rides are only available between 4 PM and 1 AM.");
-                return false;
-            }
+            if ((pickupHour < 5 || (pickupHour >= 7 && pickupHour < 16) || pickupHour >= 24)) {
+    alert("Rides are only available between 5 AM to 7 AM and 4 PM to 12 AM.");
+    return false;
+}
 
             return true;
         }
