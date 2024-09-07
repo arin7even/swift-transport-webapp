@@ -475,20 +475,6 @@
                 });
         });
 
-        // SMS functionality
-        document.getElementById('confirmRideBtn').addEventListener('click', function() {
-            const phone = document.getElementById('phone').value;
-            const time = document.getElementById('pickupTime').value;
-            const date = document.getElementById('pickupDate').value;
-            const pickup = document.getElementById('pickupLocation').value;
-            const dropoff = document.getElementById('dropoffLocation').value;
-
-            const smsMessage = `🚗 Swift Ride Confirmation\n📅 Date: ${date}\n⏰ Time: ${time}\n📍 Pickup: ${pickup}\n🏁 Dropoff: ${dropoff}`;
-            const smsLink = `sms:${phone}?body=${encodeURIComponent(smsMessage)}`;
-
-            window.location.href = smsLink; // Open the native SMS app with pre-filled message
-        });
-
         document.getElementById('cancelBtn').addEventListener('click', function() {
             window.location.reload(); // Refresh the page to reset the form
         });
