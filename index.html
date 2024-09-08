@@ -201,6 +201,10 @@
     </div>
 
     <script>
+        function showAlertMessage() {
+            alert("🚖 Welcome to Swift Ride Service! 🚖\n\n🌟 Operating Hours:\n\n WeekDays: 5 AM to 7 AM ‖ 4 PM to 12 AM \n\n Weekends: 6 AM to 12 AM \n\n⏳ Kindly ensure you reserve the ride at least 1 hour in advance for a smooth experience.\n\nThank you for choosing Swift Ride — we look forward to getting you where you need to go! 🚙💨");
+        }
+
         function validatePickupTime() {
             const pickupDate = document.getElementById('pickupDate').value;
             const pickupTime = document.getElementById('pickupTime').value;
@@ -212,6 +216,54 @@
                 return false;
             }
             return true;
+        }
+
+        function initMap() {
+            map = new google.maps.Map(document.getElementById("map"), {
+                zoom: 14,
+                center: { lat: 34.0522, lng: -118.2437 }, // Center of Los Angeles
+            });
+
+            pickupMarker = new google.maps.Marker({
+                map: map,
+                icon: 'https://cdn1.iconfinder.com/data/icons/basic-ui-elements-coloricon/21/06_1-64.png' // Green car icon for pickup
+            });
+
+            dropoffMarker = new google.maps.Marker({
+                map: map,
+                icon: 'https://cdn1.iconfinder.com/data/icons/social-messaging-ui-color/254000/67-64.png' // Red car icon for drop-off
+            });
+
+            directionsRenderer = new google.maps.DirectionsRenderer({
+                map: map,
+                suppressMarkers: true // Don't show default markers
+            });
+
+            // Initialize Autocomplete
+            const pickupInput = document.getElementById('pickupLocation');
+            const dropoffInput = document.getElementById('dropoffLocation');
+            const pickupAutocomplete = new google.maps.places.Autocomplete(pickupInput);
+            const dropoffAutocomplete = new google.maps.places.Autocomplete(dropoffInput);
+            pickupAutocomplete.bindTo('bounds', map);
+            dropoffAutocomplete.bindTo('bounds', map);
+
+            // Event listener for pickup location selection
+            pickupAutocomplete.addListener('place_changed', function () {
+                const place = pickupAutocomplete.getPlace();
+                if (!place.geometry) {
+                    return;
+                }
+                pickupCoords = place.geometry.location; // Store the coordinates of the pickup location
+            });
+
+            // Event listener for dropoff location selection
+            dropoffAutocomplete.addListener('place_changed', function () {
+                const place = dropoffAutocomplete.getPlace();
+                if (!place.geometry) {
+                    return;
+                }
+                dropoffCoords = place.geometry.location; // Store the coordinates of the dropoff location
+            });
         }
 
         document.getElementById('confirmInfoBtn').addEventListener('click', function(event) {
@@ -233,7 +285,8 @@
         });
 
         window.onload = function() {
-            // Map and other initial setup...
+            initMap();
+            showAlertMessage();
         };
     </script>
 </body>
