@@ -226,6 +226,13 @@
             return true;
         }
 
+        let map;
+        let pickupMarker;
+        let dropoffMarker;
+        let directionsRenderer;
+        let pickupCoords = null;
+        let dropoffCoords = null;
+
         function initMap() {
             map = new google.maps.Map(document.getElementById("map"), {
                 zoom: 14,
@@ -262,6 +269,7 @@
                     return;
                 }
                 pickupCoords = place.geometry.location; // Store the coordinates of the pickup location
+                pickupMarker.setPosition(pickupCoords);
             });
 
             // Event listener for dropoff location selection
@@ -271,6 +279,7 @@
                     return;
                 }
                 dropoffCoords = place.geometry.location; // Store the coordinates of the dropoff location
+                dropoffMarker.setPosition(dropoffCoords);
             });
         }
 
@@ -281,16 +290,80 @@
                 return;
             }
 
-            // Disable "Confirm Info" button and turn it grey
-            const confirmInfoBtn = document.getElementById('confirmInfoBtn');
-            confirmInfoBtn.disabled = true;
-            confirmInfoBtn.classList.remove('blinking');
+            const pickup = document.getElementById('pickupLocation').value;
+            const dropoff = document.getElementById('dropoffLocation').value;
 
-            // Show the new blinking section
-            document.getElementById('newSection').style.display = 'block';
+            const directionsService = new google.maps.DirectionsService();
+            const departureTime = new Date(`${document.getElementById('pickupDate').value}T${document.getElementById('pickupTime').value}`);
+            directionsService.route({
+                origin: pickupCoords,
+                destination: dropoffCoords,
+                travelMode: google.maps.TravelMode.DRIVING,
+                drivingOptions: {
+                    departureTime: departureTime, // Use the user-provided time for real-time traffic
+                }
+            }, function(response, status) {
+                if (status === google.maps.DirectionsStatus.OK) {
+                    const distance = response.routes[0].legs[0].distance.value / 1609.34; // Convert meters to miles
+                    const travelTime = response.routes[0].legs[0].duration_in_traffic.value / 60; // Convert seconds to minutes
 
-            // Show the fare container
-            document.getElementById('fareContainer').style.display = 'block';
+                    let fare = 10; // Base fare
+                    let fareBreakdown = `<strong>Base Fare: $10.00</strong><br>`;
+
+                    if (distance > 2) {
+                        const extraMiles = distance - 2;
+                        fare += extraMiles * 2.5; // Charge $2.5 for every mile beyond 2 miles
+                        fareBreakdown += `Additional miles (${extraMiles.toFixed(2)} miles): $${(extraMiles * 2.5).toFixed(2)}<br>`;
+                    }
+
+                    if (travelTime > 10) {
+                        const extraMinutes = travelTime - 10;
+                        fare += extraMinutes * 0.5; // Charge $0.5 for every minute beyond 10 minutes
+                        fareBreakdown += `Additional time (${extraMinutes.toFixed(2)} minutes): $${(extraMinutes * 0.5).toFixed(2)}<br>`;
+                    }
+
+                    fareBreakdown += `<strong>Total Fare: $${fare.toFixed(2)}</strong>`;
+
+                    // Display fare information
+                    document.getElementById('fareDisplay').innerHTML = `Total Fare: $${fare.toFixed(2)}`;
+                    document.getElementById('fareBreakdown').innerHTML = fareBreakdown;
+
+                    // Show the fare container
+                    document.getElementById('fareContainer').style.display = 'block';
+                    document.getElementById('tipOptions').style.visibility = 'visible'; // Show tip options
+
+                    // Enable Confirm Ride and Cancel buttons
+                    document.getElementById('confirmRideBtn').disabled = false;
+                    document.getElementById('cancelBtn').disabled = false;
+
+                    // Show the new blinking section
+                    document.getElementById('newSection').style.display = 'block';
+
+                    directionsRenderer.setDirections(response); // Display the route on the map
+                } else {
+                    alert('Could not calculate the route. Please check the addresses.');
+                }
+            });
+        });
+
+        document.getElementById('confirmRideBtn').addEventListener('click', function() {
+            const name = document.getElementById('name').value;
+            const phone = document.getElementById('phone').value;
+            const pickup = document.getElementById('pickupLocation').value;
+            const dropoff = document.getElementById('dropoffLocation').value;
+            const fare = document.getElementById('fareDisplay').innerText;
+
+            const message = `New ride booking from ${name}:\nPhone: ${phone}\nPickup: ${pickup}\nDrop-off: ${dropoff}\n${fare}`;
+            const chatId = 104897472; // Your chat ID
+            const url = `https://api.telegram.org/bot<YOUR_BOT_TOKEN>/sendMessage?chat_id=${chatId}&text=${encodeURIComponent(message)}`;
+
+            fetch(url)
+                .then(response => response.ok ? alert("Ride confirmed!") : alert("Error confirming ride."))
+                .catch(error => alert("Error sending message."));
+        });
+
+        document.getElementById('cancelBtn').addEventListener('click', function() {
+            window.location.reload(); // Refresh the page to reset the form
         });
 
         window.onload = function() {
@@ -307,4 +380,3 @@
     </script>
 </body>
 </html>
-
