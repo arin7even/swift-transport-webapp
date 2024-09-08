@@ -150,6 +150,8 @@
             border-radius: 4px;
             text-align: center;
             animation: blinkBorder 1s step-start 0s infinite;
+            border: 2px solid #007bff;
+            width: 100%;
         }
         @keyframes blinkBorder {
             50% { border-color: #007bff; } /* Blinking border color same as "Confirm Info" button */
@@ -180,6 +182,10 @@
 
         <button type="submit" id="confirmInfoBtn" class="blinking">Confirm Info</button>
 
+        <!-- New blinking section (same size as fare area) -->
+        <div id="newSection">
+        </div>
+
         <div id="fareContainer" class="fare-container" style="display: none;">
             <div id="fareDisplay" class="fare"></div>
             <div id="fareBreakdown" class="fare-description"></div>
@@ -196,8 +202,10 @@
     <div class="eta" id="etaDisplay"></div>
     <div id="map"></div>
 
-    <!-- New blinking section -->
-    <div id="newSection"> <!-- Blank section with blinking border -->
+    <!-- Share section restored -->
+    <div id="shareSection">
+        <h2>Enjoy our great prices? Please tell a friend about us. Thanks for your support!</h2>
+        <button id="shareSMSBtn">Share via SMS</button>
     </div>
 
     <script>
@@ -281,13 +289,22 @@
             // Show the new blinking section
             document.getElementById('newSection').style.display = 'block';
 
-            // Rest of your logic for confirming the info, calculating the fare, etc.
+            // Show the fare container
+            document.getElementById('fareContainer').style.display = 'block';
         });
 
         window.onload = function() {
             initMap();
             showAlertMessage();
         };
+
+        // SMS sharing functionality
+        document.getElementById('shareSMSBtn').addEventListener('click', function() {
+            const smsMessage = "Hey! Check out Swift Ride, I think you'll love their service! Here's the link: https://arin7even.github.io/swift-transport-webapp/";
+            const smsLink = `sms:?body=${encodeURIComponent(smsMessage)}`;
+            window.location.href = smsLink; // Open native SMS app with pre-filled message
+        });
     </script>
 </body>
 </html>
+
