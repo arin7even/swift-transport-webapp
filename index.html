@@ -450,6 +450,12 @@
                     document.getElementById('confirmInfoBtn').classList.remove('blinking');
                     document.getElementById('confirmInfoBtn').disabled = true;
                     document.getElementById('confirmInfoBtn').style.backgroundColor = '#6c757d';
+
+                    // Hide tier discount button if user is not Gold or Platinum
+                    const userTier = document.getElementById('userTier').innerText;
+                    if (!userTier.includes('Gold') && !userTier.includes('Platinum')) {
+                        document.getElementById('applyTierDiscountBtn').style.display = 'none';
+                    }
                 } else {
                     alert('Could not calculate the route.');
                 }
@@ -468,6 +474,9 @@
             document.getElementById('finalFareDisplay').innerHTML = `Total Fare after Discounts: $${totalFare.toFixed(2)}`;
             this.disabled = true;
 
+            // Disable "Apply Balance" button
+            document.getElementById('applyBalanceBtn').disabled = true;
+
             // Stop blinking for the referral section
             document.getElementById('referralSection').style.animation = 'none';
         });
@@ -478,6 +487,9 @@
             totalFare -= appliedBalance;
             document.getElementById('finalFareDisplay').innerHTML = `Total Fare after Discounts: $${totalFare.toFixed(2)}`;
             this.disabled = true;
+
+            // Disable "Apply Tier Discount" button
+            document.getElementById('applyTierDiscountBtn').disabled = true;
 
             // Stop blinking for the referral section
             document.getElementById('referralSection').style.animation = 'none';
@@ -518,7 +530,6 @@
             const finalFare = document.getElementById('finalFareDisplay').innerText;
             const tierDiscount = appliedTierDiscount ? `$${appliedTierDiscount.toFixed(2)}` : 'None';
             const balanceApplied = appliedBalance ? `$${appliedBalance.toFixed(2)}` : 'None';
-            const additionalTime = document.getElementById('fareBreakdown').innerHTML;
             const pickupTime = document.getElementById('pickupTime').value;
             const pickupDate = document.getElementById('pickupDate').value;
             const pickupLink = `https://www.google.com/maps/search/?api=1&query=${pickupCoords.lat()},${pickupCoords.lng()}`;
