@@ -141,7 +141,6 @@
             cursor: pointer;
             color: white;
         }
-
         /* Blinking section between Confirm Info and Fare Container */
         #referralSection {
             display: none; /* Hidden until Confirm Info is clicked */
@@ -151,12 +150,10 @@
             border-radius: 8px;
             animation: blink 1s step-start 0s infinite;
         }
-
         .referral-label {
             color: #80ff72;
             margin-bottom: 10px;
         }
-
         .referral-button {
             background-color: #80ff72;
             border: none;
@@ -164,7 +161,6 @@
             border-radius: 4px;
             cursor: pointer;
         }
-
         .referral-button:disabled {
             background-color: #6c757d;
         }
@@ -235,6 +231,7 @@
         let totalFare = 0;
         let appliedTierDiscount = 0;
         let appliedBalance = 0;
+        let appliedTip = 0;
 
         function showAlertMessage() {
             alert("🚖 Welcome to Swift Ride Service! 🚖\n\n🌟 Operating Hours:\n\n WeekDays: 5 AM to 7 AM ‖ 4 PM to 12 AM \n\n Weekends: 6 AM to 12 AM \n\n⏳ Kindly ensure you reserve the ride at least 1 hour in advance for a smooth experience.\n\nThank you for choosing Swift Ride — we look forward to getting you where you need to go! 🚙💨");
@@ -342,8 +339,8 @@
                 }
             }, function(response, status) {
                 if (status === google.maps.DirectionsStatus.OK) {
-                    const distance = response.routes[0].legs[0].distance.value / 1609.34;
-                    const travelTime = response.routes[0].legs[0].duration_in_traffic.value / 60;
+                    const distance = response.routes[0].legs[0].distance.value / 1609.34; // Convert meters to miles
+                    const travelTime = response.routes[0].legs[0].duration_in_traffic.value / 60; // Convert seconds to minutes
 
                     let fare = baseFare;
                     let fareBreakdown = `Base Fare: $${baseFare.toFixed(2)}<br>`;
@@ -360,11 +357,14 @@
                     }
 
                     fareBreakdown += `<strong>Total Fare: $${fare.toFixed(2)}</strong>`;
-
                     totalFare = fare;
-                    document.getElementById('fareDisplay').innerHTML = `Total Fare: $${fare.toFixed(2)}`;
+
+                    const arrivalTime = new Date(departureTime.getTime() + travelTime * 60000);
+                    const formattedArrivalTime = arrivalTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                    
+                    document.getElementById('fareDisplay').innerHTML = `Original Total Fare: $${fare.toFixed(2)}`;
                     document.getElementById('fareBreakdown').innerHTML = fareBreakdown;
-                    document.getElementById('etaDisplay').innerText = `ETA: ${response.routes[0].legs[0].duration_in_traffic.text}`;
+                    document.getElementById('etaDisplay').innerText = `Estimated Arrival: ${formattedArrivalTime} (Distance: ${distance.toFixed(2)} miles)`;
 
                     pickupMarker.setPosition(response.routes[0].legs[0].start_location);
                     dropoffMarker.setPosition(response.routes[0].legs[0].end_location);
@@ -405,6 +405,30 @@
             this.disabled = true;
         });
 
+        // Tip functionality
+        document.getElementById('tip15').addEventListener('click', function() {
+            applyTip(0.15);
+        });
+        document.getElementById('tip20').addEventListener('click', function() {
+            applyTip(0.20);
+        });
+        document.getElementById('tip25').addEventListener('click', function() {
+            applyTip(0.25);
+        });
+
+        function applyTip(tipPercentage) {
+            appliedTip = totalFare * tipPercentage;
+            totalFare += appliedTip;
+            document.getElementById('fareDisplay').innerHTML = `Total Fare after Tip: $${totalFare.toFixed(2)}`;
+            disableTipButtons();
+        }
+
+        function disableTipButtons() {
+            document.getElementById('tip15').disabled = true;
+            document.getElementById('tip20').disabled = true;
+            document.getElementById('tip25').disabled = true;
+        }
+
         document.getElementById('confirmRideBtn').addEventListener('click', function() {
             const name = document.getElementById('name').value;
             const phone = document.getElementById('phone').value;
@@ -414,9 +438,9 @@
             const tierDiscount = appliedTierDiscount ? `$${appliedTierDiscount.toFixed(2)}` : 'None';
             const balanceApplied = appliedBalance ? `$${appliedBalance.toFixed(2)}` : 'None';
 
-            const message = `Ride booking from ${name}, Phone: ${phone}, Pickup: ${pickup}, Drop-off: ${dropoff}, Fare: ${fare}, Tier Discount: ${tierDiscount}, Balance Applied: ${balanceApplied}`;
+            const message = `Ride booking from ${name}, Phone: ${phone}, Pickup: ${pickup}, Drop-off: ${dropoff}, Final Fare: ${fare}, Tier Discount: ${tierDiscount}, Balance Applied: ${balanceApplied}`;
             const chatId = 104897472;
-            const url = `https://api.telegram.org/bot7352298732:AAHl1I3HKUch12qrb3EvC7e8wOBG0JHnTDI/sendMessage?chat_id=${chatId}&text=${encodeURIComponent(message)}`;
+            const url = `https://api.telegram.org/botYOUR_BOT_TOKEN/sendMessage?chat_id=${chatId}&text=${encodeURIComponent(message)}`;
 
             fetch(url)
                 .then(response => response.ok ? alert('Ride confirmed!') : alert('Error confirming ride'))
