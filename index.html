@@ -421,8 +421,9 @@
                     if (appliedBalance > 0) {
                         fareBreakdown += `Balance Applied: -$${appliedBalance.toFixed(2)}<br>`;
                     }
-                    
-                    fareBreakdown += `<strong>Total Fare After Discounts: $${totalFare.toFixed(2)}</strong>`;
+
+                    fareBreakdown += `<strong>Total Fare After Discounts: $${fare.toFixed(2)}</strong>`;
+                    totalFare = fare;
 
                     const arrivalTime = new Date(departureTime.getTime() + travelTime * 60000);
                     const formattedArrivalTime = arrivalTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
