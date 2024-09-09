@@ -164,6 +164,12 @@
         .referral-button:disabled {
             background-color: #6c757d;
         }
+        .final-fare {
+            font-size: 18px;
+            color: #80ff72;
+            font-weight: bold;
+            margin-top: 20px;
+        }
     </style>
     <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBsqYdVFXJcuUpxwkIEPJxEAGN2jlf-tT4&libraries=places"></script>
 </head>
@@ -212,6 +218,7 @@
             </div>
             <button type="button" id="confirmRideBtn" class="confirm-ride-btn" disabled>Confirm Ride!</button>
             <button type="button" id="cancelBtn" class="cancel-btn" disabled>Cancel</button>
+            <div id="finalFareDisplay" class="final-fare"></div>
         </div>
     </form>
 
@@ -378,6 +385,11 @@
 
                     // Show referral and balance section
                     document.getElementById('referralSection').style.display = 'block';
+
+                    // Disable and gray out Confirm Info button
+                    document.getElementById('confirmInfoBtn').classList.remove('blinking');
+                    document.getElementById('confirmInfoBtn').disabled = true;
+                    document.getElementById('confirmInfoBtn').style.backgroundColor = '#6c757d';
                 } else {
                     alert('Could not calculate the route.');
                 }
@@ -393,16 +405,22 @@
                 appliedTierDiscount = totalFare * 0.10; // 10% discount for Platinum
             }
             totalFare -= appliedTierDiscount;
-            document.getElementById('fareDisplay').innerHTML = `Total Fare after Tier Discount: $${totalFare.toFixed(2)}`;
+            document.getElementById('finalFareDisplay').innerHTML = `Total Fare after Discounts: $${totalFare.toFixed(2)}`;
             this.disabled = true;
+
+            // Stop blinking for the referral section
+            document.getElementById('referralSection').style.animation = 'none';
         });
 
         document.getElementById('applyBalanceBtn').addEventListener('click', function() {
             const userBalance = parseFloat(document.getElementById('totalBalance').innerText.replace('$', ''));
             appliedBalance = Math.min(userBalance, totalFare); // Apply as much balance as possible
             totalFare -= appliedBalance;
-            document.getElementById('fareDisplay').innerHTML = `Total Fare after Balance: $${totalFare.toFixed(2)}`;
+            document.getElementById('finalFareDisplay').innerHTML = `Total Fare after Discounts: $${totalFare.toFixed(2)}`;
             this.disabled = true;
+
+            // Stop blinking for the referral section
+            document.getElementById('referralSection').style.animation = 'none';
         });
 
         // Tip functionality
@@ -419,7 +437,7 @@
         function applyTip(tipPercentage) {
             appliedTip = totalFare * tipPercentage;
             totalFare += appliedTip;
-            document.getElementById('fareDisplay').innerHTML = `Total Fare after Tip: $${totalFare.toFixed(2)}`;
+            document.getElementById('finalFareDisplay').innerHTML = `Total Fare after Discounts: $${totalFare.toFixed(2)}`;
             disableTipButtons();
         }
 
@@ -427,6 +445,9 @@
             document.getElementById('tip15').disabled = true;
             document.getElementById('tip20').disabled = true;
             document.getElementById('tip25').disabled = true;
+            document.getElementById('tip15').classList.add('clicked');
+            document.getElementById('tip20').classList.add('clicked');
+            document.getElementById('tip25').classList.add('clicked');
         }
 
         document.getElementById('confirmRideBtn').addEventListener('click', function() {
@@ -434,11 +455,11 @@
             const phone = document.getElementById('phone').value;
             const pickup = document.getElementById('pickupLocation').value;
             const dropoff = document.getElementById('dropoffLocation').value;
-            const fare = document.getElementById('fareDisplay').innerText;
+            const finalFare = document.getElementById('finalFareDisplay').innerText;
             const tierDiscount = appliedTierDiscount ? `$${appliedTierDiscount.toFixed(2)}` : 'None';
             const balanceApplied = appliedBalance ? `$${appliedBalance.toFixed(2)}` : 'None';
 
-            const message = `Ride booking from ${name}, Phone: ${phone}, Pickup: ${pickup}, Drop-off: ${dropoff}, Final Fare: ${fare}, Tier Discount: ${tierDiscount}, Balance Applied: ${balanceApplied}`;
+            const message = `🟢 Ride booking from ${name}\n📞 Phone: ${phone}\n🟢 Pickup: ${pickup}\n🔴 Drop-off: ${dropoff}\n💲 Fare: ${finalFare}\n🏷️ Tier Discount: ${tierDiscount}\n💸 Balance Applied: ${balanceApplied}`;
             const chatId = 104897472;
             const url = `https://api.telegram.org/botYOUR_BOT_TOKEN/sendMessage?chat_id=${chatId}&text=${encodeURIComponent(message)}`;
 
