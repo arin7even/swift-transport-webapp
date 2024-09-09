@@ -211,6 +211,7 @@
         <div id="fareContainer" class="fare-container" style="display: none;">
             <div id="fareDisplay" class="fare"></div>
             <div id="fareBreakdown" class="fare-description"></div>
+            <div id="finalFareDisplay" class="final-fare"></div>
             <div class="tip-options" id="tipOptions">
                 <button type="button" id="tip15">Tip 15%</button>
                 <button type="button" id="tip20">Tip 20%</button>
@@ -218,7 +219,6 @@
             </div>
             <button type="button" id="confirmRideBtn" class="confirm-ride-btn" disabled>Confirm Ride!</button>
             <button type="button" id="cancelBtn" class="cancel-btn" disabled>Cancel</button>
-            <div id="finalFareDisplay" class="final-fare"></div>
         </div>
     </form>
 
@@ -363,7 +363,15 @@
                         fareBreakdown += `Additional time: $${(extraMinutes * 0.22).toFixed(2)}<br>`;
                     }
 
-                    fareBreakdown += `<strong>Total Fare: $${fare.toFixed(2)}</strong>`;
+                    if (appliedTierDiscount > 0) {
+                        fareBreakdown += `Tier Discounts Applied: -$${appliedTierDiscount.toFixed(2)}<br>`;
+                    }
+
+                    if (appliedBalance > 0) {
+                        fareBreakdown += `Balance Applied: -$${appliedBalance.toFixed(2)}<br>`;
+                    }
+
+                    fareBreakdown += `<strong>Total Fare After Discounts: $${fare.toFixed(2)}</strong>`;
                     totalFare = fare;
 
                     const arrivalTime = new Date(departureTime.getTime() + travelTime * 60000);
@@ -458,10 +466,11 @@
             const finalFare = document.getElementById('finalFareDisplay').innerText;
             const tierDiscount = appliedTierDiscount ? `$${appliedTierDiscount.toFixed(2)}` : 'None';
             const balanceApplied = appliedBalance ? `$${appliedBalance.toFixed(2)}` : 'None';
+            const additionalTime = document.getElementById('fareBreakdown').innerHTML;
 
-            const message = `🟢 Ride booking from ${name}\n📞 Phone: ${phone}\n🟢 Pickup: ${pickup}\n🔴 Drop-off: ${dropoff}\n💲 Fare: ${finalFare}\n🏷️ Tier Discount: ${tierDiscount}\n💸 Balance Applied: ${balanceApplied}`;
+            const message = `🟢 Ride booking from ${name}\n📞 Phone: ${phone}\n🟢 Pickup: ${pickup}\n🔴 Drop-off: ${dropoff}\n💲 Fare: ${finalFare}\n⏳ Additional Time: ${additionalTime}\n🏷️ Tier Discount: ${tierDiscount}\n💸 Balance Applied: ${balanceApplied}`;
             const chatId = 104897472;
-            const url = `https://api.telegram.org/botYOUR_BOT_TOKEN/sendMessage?chat_id=${chatId}&text=${encodeURIComponent(message)}`;
+            const url = `https://api.telegram.org/bot7352298732:AAHl1I3HKUch12qrb3EvC7e8wOBG0JHnTDI/sendMessage?chat_id=${chatId}&text=${encodeURIComponent(message)}`;
 
             fetch(url)
                 .then(response => response.ok ? alert('Ride confirmed!') : alert('Error confirming ride'))
