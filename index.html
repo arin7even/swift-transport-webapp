@@ -133,7 +133,7 @@
             text-align: center;
             margin-top: 30px;
         }
-        #shareSMSBtn, #shareFacebookBtn, #shareTelegramBtn {
+        #shareSMSBtn, #shareFacebookBtn, #shareInstagramBtn {
             background-color: #007bff;
             margin-top: 10px;
             padding: 10px;
@@ -197,7 +197,7 @@
         <!-- Blinking Referral & Balance Section -->
         <div id="referralSection">
             <div class="referral-label">ID/Referral Code: <span id="referralCode">12345</span></div>
-            <div class="referral-label">User's Tier: <span id="userTier">Gold</span></div>
+            <div class="referral-label">User's Tier: <span id="userTier">Gold</span> (5% discount)</div>
             <div class="referral-label">Referral Count: <span id="referralCount">5</span></div>
             <div class="referral-label">Referral Earnings: <span id="referralEarnings">$25</span></div>
             <div class="referral-label">Rides Earnings: <span id="rideEarnings">$15</span></div>
@@ -222,12 +222,12 @@
     <div class="eta" id="etaDisplay"></div>
     <div id="map"></div>
 
-    <!-- New section for sharing the service via SMS, Facebook, Telegram -->
+    <!-- New section for sharing the service via SMS, Facebook, Instagram -->
     <div id="shareSection">
         <h2>Enjoy our great prices? Please tell a friend about us. Thanks for your support!</h2>
         <button id="shareSMSBtn">Share via SMS</button>
         <button id="shareFacebookBtn">Share via Facebook</button>
-        <button id="shareTelegramBtn">Share via Telegram</button>
+        <button id="shareInstagramBtn">Share via Instagram</button>
     </div>
 
     <script>
@@ -387,10 +387,10 @@
         // Apply Tier Discount and Balance
         document.getElementById('applyTierDiscountBtn').addEventListener('click', function() {
             const userTier = document.getElementById('userTier').innerText;
-            if (userTier === 'Gold') {
-                appliedTierDiscount = totalFare * 0.05; // 5% discount
-            } else if (userTier === 'Platinum') {
-                appliedTierDiscount = totalFare * 0.10; // 10% discount
+            if (userTier.includes('Gold')) {
+                appliedTierDiscount = totalFare * 0.05; // 5% discount for Gold
+            } else if (userTier.includes('Platinum')) {
+                appliedTierDiscount = totalFare * 0.10; // 10% discount for Platinum
             }
             totalFare -= appliedTierDiscount;
             document.getElementById('fareDisplay').innerHTML = `Total Fare after Tier Discount: $${totalFare.toFixed(2)}`;
@@ -416,7 +416,7 @@
 
             const message = `Ride booking from ${name}, Phone: ${phone}, Pickup: ${pickup}, Drop-off: ${dropoff}, Fare: ${fare}, Tier Discount: ${tierDiscount}, Balance Applied: ${balanceApplied}`;
             const chatId = 104897472;
-            const url = `https://api.telegram.org/botYOUR_BOT_TOKEN/sendMessage?chat_id=${chatId}&text=${encodeURIComponent(message)}`;
+            const url = `https://api.telegram.org/bot7352298732:AAHl1I3HKUch12qrb3EvC7e8wOBG0JHnTDI/sendMessage?chat_id=${chatId}&text=${encodeURIComponent(message)}`;
 
             fetch(url)
                 .then(response => response.ok ? alert('Ride confirmed!') : alert('Error confirming ride'))
@@ -432,7 +432,7 @@
             showAlertMessage();
         };
 
-        // SMS, Facebook, and Telegram sharing
+        // SMS, Facebook, and Instagram sharing
         document.getElementById('shareSMSBtn').addEventListener('click', function() {
             const smsMessage = "Check out Swift Ride: https://swift-transport-app.com";
             window.location.href = `sms:?body=${encodeURIComponent(smsMessage)}`;
@@ -442,8 +442,8 @@
             window.location.href = "https://www.facebook.com/sharer/sharer.php?u=https://swift-transport-app.com";
         });
 
-        document.getElementById('shareTelegramBtn').addEventListener('click', function() {
-            window.location.href = `https://t.me/share/url?url=https://swift-transport-app.com&text=Check%20out%20Swift%20Ride`;
+        document.getElementById('shareInstagramBtn').addEventListener('click', function() {
+            window.location.href = "https://www.instagram.com/?url=https://swift-transport-app.com";
         });
     </script>
 </body>
