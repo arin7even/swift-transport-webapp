@@ -352,10 +352,61 @@
                     let fare = baseFare;
                     let fareBreakdown = `Base Fare: $${baseFare.toFixed(2)}<br>`;
                     
-                    if (distance > 2) {
-                        const extraMiles = distance - 2;
-                        fare += extraMiles * 2.5;
-                        fareBreakdown += `Additional miles: ${extraMiles.toFixed(2)} miles x $2.50/mile = $${(extraMiles * 2.5).toFixed(2)}<br>`;
+                    if (distance <= 2) {
+                        fare = 10.00; // $10 flat rate for up to 2 miles
+                        fareBreakdown = `
+                            <div class="fare-step">
+                                <strong class="fare-title">Base Fare: $10.00</strong>
+                                Covers the first 2 miles and 10 minutes.
+                            </div>`;
+                    } else if (distance <= 5) {
+                        fare = 10 + (distance - 2) * 2.8;
+                        fareBreakdown = `
+                            <div class="fare-step">
+                                <strong class="fare-title">$2.80 per mile after the base fare (10$ for the first 2 miles and first 10 minutes)</strong>
+                            </div>
+                            <div class="fare-step">
+                                Distance beyond 2 miles: ${distance.toFixed(2)} - 2 = ${(distance - 2).toFixed(2)} miles
+                            </div>
+                            <div class="fare-step">
+                                Additional miles cost: ${(distance - 2).toFixed(2)} miles x $2.80 per mile = $${((distance - 2) * 2.8).toFixed(2)}
+                            </div>`;
+                    } else if (distance <= 10) {
+                        fare = 10 + (distance - 2) * 2.5;
+                        fareBreakdown = `
+                            <div class="fare-step">
+                                <strong class="fare-title">$2.50 per mile after the base fare (10$ for the first 2 miles and first 10 minutes)</strong>
+                            </div>
+                            <div class="fare-step">
+                                Distance beyond 2 miles: ${distance.toFixed(2)} - 2 = ${(distance - 2).toFixed(2)} miles
+                            </div>
+                            <div class="fare-step">
+                                Additional miles cost: ${(distance - 2).toFixed(2)} miles x $2.50 per mile = $${((distance - 2) * 2.5).toFixed(2)}
+                            </div>`;
+                    } else if (distance <= 15) {
+                        fare = 10 + (distance - 2) * 2;
+                        fareBreakdown = `
+                            <div class="fare-step">
+                                <strong class="fare-title">$2.00 per mile after the base fare (10$ for the first 2 miles and first 10 minutes)</strong>
+                            </div>
+                            <div class="fare-step">
+                                Distance beyond 2 miles: ${distance.toFixed(2)} - 2 = ${(distance - 2).toFixed(2)} miles
+                            </div>
+                            <div class="fare-step">
+                                Additional miles cost: ${(distance - 2).toFixed(2)} miles x $2.00 per mile = $${((distance - 2) * 2).toFixed(2)}
+                            </div>`;
+                    } else {
+                        fare = 10 + (distance - 2) * 1.75;
+                        fareBreakdown = `
+                            <div class="fare-step">
+                                <strong class="fare-title">$1.75 per extra mile(Base: 10$ for first 2 miles / 10 minutes)</strong>
+                            </div>
+                            <div class="fare-step">
+                                Distance beyond 2 miles: ${distance.toFixed(2)} - 2 = ${(distance - 2).toFixed(2)} miles
+                            </div>
+                            <div class="fare-step">
+                                Additional miles cost: ${(distance - 2).toFixed(2)} miles x $1.75 per mile = $${((distance - 2) * 1.75).toFixed(2)}
+                            </div>`;
                     }
                     if (travelTime > 10) {
                         const extraMinutes = travelTime - 10;
