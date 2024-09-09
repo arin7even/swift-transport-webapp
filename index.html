@@ -355,12 +355,12 @@
                     if (distance > 2) {
                         const extraMiles = distance - 2;
                         fare += extraMiles * 2.5;
-                        fareBreakdown += `Additional miles: $${(extraMiles * 2.5).toFixed(2)}<br>`;
+                        fareBreakdown += `Additional miles: ${extraMiles.toFixed(2)} miles x $2.50/mile = $${(extraMiles * 2.5).toFixed(2)}<br>`;
                     }
                     if (travelTime > 10) {
                         const extraMinutes = travelTime - 10;
                         fare += extraMinutes * 0.22;
-                        fareBreakdown += `Additional time: $${(extraMinutes * 0.22).toFixed(2)}<br>`;
+                        fareBreakdown += `Additional time: ${extraMinutes.toFixed(2)} minutes x $0.22/min = $${(extraMinutes * 0.22).toFixed(2)}<br>`;
                     }
 
                     if (appliedTierDiscount > 0) {
