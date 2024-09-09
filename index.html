@@ -422,7 +422,8 @@
                         fareBreakdown += `Balance Applied: -$${appliedBalance.toFixed(2)}<br>`;
                     }
 
-                    fareBreakdown += `<strong>Total Fare After Discounts: $${fare.toFixed(2)}</strong>`;
+                    fareBreakdown += `<span style="color: #2c2c2c;">(Total Fare After Discounts: $${fare.toFixed(2)})</span>`;
+
                     totalFare = fare;
 
                     const arrivalTime = new Date(departureTime.getTime() + travelTime * 60000);
