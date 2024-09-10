@@ -7,14 +7,35 @@
     <style>
         /* (Your existing styles go here) */
     </style>
-    <script src="https://maps.googleapis.com/maps/api/js?key=YOUR_GOOGLE_MAPS_API_KEY&libraries=places"></script>
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBsqYdVFXJcuUpxwkIEPJxEAGN2jlf-tT4&libraries=places"></script>
 </head>
 <body>
     <h1>Book Your Ride</h1>
     <form id="bookingForm">
-        <!-- Your input fields go here (Name, Phone, Pickup, Dropoff, etc.) -->
+        <!-- Your input fields (Name, Phone, Pickup, Dropoff, etc.) -->
 
-        <button type="submit" id="confirmInfoBtn">Confirm Info</button>
+        <label for="name">Your Name:</label>
+        <input type="text" id="name" name="name" required>
+
+        <label for="phone">Phone Number:</label>
+        <input type="text" id="phone" name="phone" required>
+		
+        <label for="referralCode">Referral Code (Optional):</label>
+        <input type="text" id="referralCode" name="referralCode">
+
+        <label for="pickupTime">Pickup Time:</label>
+        <input type="time" id="pickupTime" name="pickupTime" required>
+
+        <label for="pickupDate">Pickup Date:</label>
+        <input type="date" id="pickupDate" name="pickupDate" required>
+
+        <label for="pickupLocation">Pickup Location:</label>
+        <input type="text" id="pickupLocation" name="pickupLocation" required>
+
+        <label for="dropoffLocation">Drop-off Location:</label>
+        <input type="text" id="dropoffLocation" name="dropoffLocation" required>
+
+        <button type="submit" id="confirmInfoBtn" class="blinking">Confirm Info</button>
 
         <div id="fareContainer" style="display: none;">
             <!-- Fare Breakdown, Balance, Referral Info, etc. -->
@@ -27,12 +48,10 @@
         let baseFare = 10.00;
         let totalFare = 0;
 
-        // Google Maps Initialization
         function initMap() {
             // Your existing map code
         }
 
-        // On "Confirm Info" button click
         document.getElementById('confirmInfoBtn').addEventListener('click', async function(event) {
             event.preventDefault();
 
@@ -41,7 +60,7 @@
             const userID = name + phone.slice(-4);  // Example user ID generation
 
             // Fetch user data
-            const response = await fetch(`YOUR_GOOGLE_SCRIPT_URL?userID=${userID}`);
+            const response = await fetch(`https://script.google.com/macros/s/AKfycbyDZ1-77fYE2kflnlvWYjeIJi3E75IaJ7wP2CCLsAGVm0sUfeLdQQNzVIIQQ19LG2TF_g/exec?userID=${userID}`);
             const userInfo = await response.json();
 
             if (userInfo) {
@@ -61,7 +80,7 @@
                     tipsPaid: 0, userTier: 'Silver', tierDiscount: '0%'
                 };
 
-                await fetch('YOUR_GOOGLE_SCRIPT_URL', {
+                await fetch('https://script.google.com/macros/s/AKfycbyDZ1-77fYE2kflnlvWYjeIJi3E75IaJ7wP2CCLsAGVm0sUfeLdQQNzVIIQQ19LG2TF_g/exec', {
                     method: 'POST',
                     body: JSON.stringify(newUser)
                 });
@@ -71,7 +90,6 @@
             // (Handle fare calculation and map updates)
         });
 
-        // Google Maps initialization when the page loads
         window.onload = function() {
             initMap();
         };
