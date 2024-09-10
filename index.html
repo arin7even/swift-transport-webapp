@@ -201,12 +201,12 @@
 
         <!-- Blinking Referral & Balance Section -->
         <div id="referralSection">
-            <div class="referral-label">ID/Referral Code: <span id="referralCode">12345</span></div>
-            <div class="referral-label">User's Tier: <span id="userTier">Gold</span> (5% discount)</div>
-            <div class="referral-label">Referral Count: <span id="referralCount">5</span></div>
-            <div class="referral-label">Referral Earnings: <span id="referralEarnings">$25</span></div>
-            <div class="referral-label">Rides Earnings: <span id="rideEarnings">$15</span></div>
-            <div class="referral-label">Total Balance: <span id="totalBalance">$40</span></div>
+            <div class="referral-label">ID/Referral Code: <span id="referralCode"></span></div>
+<div class="referral-label">User's Tier: <span id="userTier"></span></div>
+<div class="referral-label">Referral Count: <span id="referralCount"></span></div>
+<div class="referral-label">Referral Earnings: <span id="referralEarnings"></span></div>
+<div class="referral-label">Rides Earnings: <span id="ridesEarnings"></span></div>
+<div class="referral-label">Total Balance: <span id="totalBalance"></span></div>
             <button class="referral-button" id="applyBalanceBtn">Apply Balance</button>
             <button class="referral-button" id="applyTierDiscountBtn">Apply Tier Discount</button>
         </div>
@@ -346,17 +346,17 @@ const userID = name + phone.slice(-4); // Generate user ID
 
 		
           if (userInfo) {
-          // Existing user: Populate the UI with user data
-          document.getElementById('userID').value = userInfo.userID;
-          document.getElementById('userTier').innerText = `${userInfo.userTier} (${userInfo.tierDiscount}% discount)`;
-          document.getElementById('referralCount').innerText = userInfo.referralCount;
-          document.getElementById('referralEarnings').innerText = `$${userInfo.referralEarnings}`;
-          document.getElementById('ridesEarnings').innerText = `$${userInfo.ridesEarnings}`;
-          document.getElementById('totalBalance').innerText = `$${userInfo.totalBalance}`;
-        } else {
-           // New user: You can handle new user creation later
-         console.log("New user! We will add logic for new user creation.");
-} 
+    // Existing user: Populate the UI with user data
+    document.getElementById('referralCode').innerText = userInfo.userID; // userID acts as the referral code
+    document.getElementById('userTier').innerText = `${userInfo.userTier} (${userInfo.tierDiscount}% discount)`;
+    document.getElementById('referralCount').innerText = userInfo.referralCount;
+    document.getElementById('referralEarnings').innerText = `$${userInfo.referralEarnings}`;
+    document.getElementById('ridesEarnings').innerText = `$${userInfo.ridesEarnings}`;
+    document.getElementById('totalBalance').innerText = `$${userInfo.totalBalance}`;
+} else {
+    // New user logic will be handled here later
+    console.log("New user! We will add logic for new user creation.");
+}
 
             const pickup = document.getElementById('pickupLocation').value;
             const dropoff = document.getElementById('dropoffLocation').value;
