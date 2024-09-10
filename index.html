@@ -346,14 +346,14 @@ const userID = name + phone.slice(-4); // Generate user ID
 
 		
          if (userInfo && userInfo.userID) {
-    // Existing user: Populate the UI with user data
     document.getElementById('referralCode').innerText = userInfo.userID; // userID acts as the referral code
-    document.getElementById('userTier').innerText = `${userInfo.userTier} (${userInfo.tierDiscount})`;
+    document.getElementById('userTier').innerText = `${userInfo.userTier} (${userInfo.tierDiscount})`; // Correct tier display
     document.getElementById('referralCount').innerText = userInfo.referralCount;
     document.getElementById('referralEarnings').innerText = `$${userInfo.referralEarnings}`;
     document.getElementById('ridesEarnings').innerText = `$${userInfo.ridesEarnings}`;
-    document.getElementById('totalBalance').innerText = `$${userInfo.totalBalance}`;
-} else {
+    document.getElementById('totalBalance').innerText = `$${userInfo.totalBalance}`; // Display correct balance
+}
+ else {
     // New user: Handle logic for new user creation later
     console.log("New user! We will add logic for new user creation.");
 }
