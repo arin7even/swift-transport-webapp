@@ -170,6 +170,18 @@
             font-weight: bold;
             margin-top: 20px;
         }
+        .share-section {
+    display: flex;
+    gap: 15px;
+    justify-content: center;
+    margin-top: 20px;
+}
+
+.share-icon {
+    width: 40px;
+    height: 40px;
+    cursor: pointer;
+}
     </style>
     <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBsqYdVFXJcuUpxwkIEPJxEAGN2jlf-tT4&libraries=places"></script>
 </head>
@@ -227,11 +239,18 @@
 
     <!-- New section for sharing the service via SMS, Facebook, Instagram -->
     <div id="shareSection">
-        <h2>Enjoy our great prices? Please tell a friend about us. Thanks for your support!</h2>
-        <button id="shareSMSBtn">Share via SMS</button>
-        <button id="shareFacebookBtn">Share via Facebook</button>
-        <button id="shareInstagramBtn">Share via Instagram</button>
-    </div>
+    <h2>Enjoy our great prices? Please tell a friend about us. Thanks for your support!</h2>
+    <a id="shareSMSBtn" href="#">
+        <img src="path-to-sms-icon.png" alt="Share via SMS" class="share-icon">
+    </a>
+    <a id="shareFacebookBtn" href="#">
+        <img src="path-to-facebook-icon.png" alt="Share on Facebook" class="share-icon">
+    </a>
+    <a id="shareInstagramBtn" href="#">
+        <img src="path-to-instagram-icon.png" alt="Share on Instagram" class="share-icon">
+    </a>
+</div>
+
 
     <script>
         let baseFare = 10.00;
