@@ -554,18 +554,21 @@
         };
 
         // SMS, Facebook, and Instagram sharing
-        document.getElementById('shareSMSBtn').addEventListener('click', function() {
-            const smsMessage = "Check out Swift Ride: https://swift-transport-app.com";
-            window.location.href = `sms:?body=${encodeURIComponent(smsMessage)}`;
-        });
+document.getElementById('shareSMSBtn').addEventListener('click', function(event) {
+    event.preventDefault();
+    const smsMessage = "Check out Swift Ride: https://www.goswiftrides.com";
+    window.location.href = `sms:?body=${encodeURIComponent(smsMessage)}`;
+});
 
-        document.getElementById('shareFacebookBtn').addEventListener('click', function() {
-            window.location.href = "https://www.facebook.com/sharer/sharer.php?u=https://swift-transport-app.com";
-        });
+document.getElementById('shareFacebookBtn').addEventListener('click', function(event) {
+    event.preventDefault();
+    window.location.href = "https://www.facebook.com/sharer/sharer.php?u=https://www.goswiftrides.com";
+});
 
-        document.getElementById('shareInstagramBtn').addEventListener('click', function() {
-            window.location.href = "https://www.instagram.com/?url=https://swift-transport-app.com";
-        });
+document.getElementById('shareInstagramBtn').addEventListener('click', function(event) {
+    event.preventDefault();
+    window.location.href = "https://www.instagram.com/?url=https://www.goswiftrides.com";
+});
     </script>
 </body>
 </html>
